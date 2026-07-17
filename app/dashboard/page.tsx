@@ -1,0 +1,5 @@
+"use client";
+/* eslint-disable @next/next/no-html-link-for-pages */
+import { useEffect, useState } from "react";
+type User={displayName:string;loginCode:string;level:string};
+export default function Dashboard(){const[user,setUser]=useState<User|null>(null);useEffect(()=>{fetch("/api/auth/me").then(async r=>{if(!r.ok){location.href="/login";return;}setUser((await r.json()).user)});},[]);if(!user)return <main className="account-shell">Đang tải hồ sơ...</main>;return <main className="dashboard-page"><header><div><span className="kicker">HỒ SƠ HỌC TẬP</span><h1>Xin chào, {user.displayName}</h1><p>{user.loginCode} · Cấp độ {user.level}</p></div><a className="button primary" href="/#lessons">Tiếp tục học →</a></header><section className="profile-stats"><article><b>0</b><span>Bài hoàn thành</span></article><article><b>0 phút</b><span>Thời gian nghe</span></article><article><b>—</b><span>Điểm phát âm</span></article></section><section className="empty-progress"><span>🎧</span><h2>Bắt đầu bài học đầu tiên</h2><p>Kết quả nghe, nói và bản ghi của bạn sẽ xuất hiện tại đây.</p></section></main>}
