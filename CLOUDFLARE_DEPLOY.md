@@ -29,9 +29,14 @@ dùng `npx wrangler deploy`.
 
 1. Mở **Storage & Databases** > **D1 SQL Database**.
 2. Tạo database `cambridge-listen-speak-db`.
-3. Trong Worker, mở **Settings** > **Bindings**.
-4. Thêm D1 binding với tên biến chính xác `DB`.
-5. Chọn database vừa tạo.
+3. Mở database vừa tạo và sao chép **Database ID**.
+4. Trong cấu hình build/deploy của Worker, thêm biến
+   `CLOUDFLARE_D1_DATABASE_ID` với giá trị là Database ID vừa sao chép.
+5. Deploy lại dự án. Cấu hình build sẽ tạo D1 binding tên chính xác `DB`.
+
+Không dùng ID mẫu `00000000-0000-4000-8000-000000000000`. Nếu chưa khai báo
+`CLOUDFLARE_D1_DATABASE_ID`, dự án vẫn deploy được nhưng các chức năng đăng nhập,
+quản trị và lưu tiến độ cần database sẽ chưa hoạt động.
 
 Ứng dụng tự tạo bảng cần thiết trong lần đăng nhập đầu tiên.
 
