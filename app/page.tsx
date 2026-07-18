@@ -217,25 +217,46 @@ function cleanAnswer(answer: string) {
   return answer.replace(/^[A-Z][a-z]+ is /, "").replace(/\s*=\s*/g, " is ").replace(/^học viên tự trả lời$/, "your own ideas");
 }
 
+const themeEnglish: Record<string, string> = {
+  "Một ngày ở trường": "a day at school",
+  "Tham quan sở thú": "a visit to the zoo",
+  "Cuối tuần cùng gia đình": "a family weekend",
+  "Đồ ăn và bữa tiệc": "food and a party",
+  "Kỳ nghỉ ngày mưa": "a rainy holiday",
+  "Ngày hội thể thao": "a sports day",
+  "Câu lạc bộ mới": "a new club",
+  "Kế hoạch du lịch": "travel plans",
+  "Thói quen lành mạnh": "healthy habits",
+  "Công nghệ ở trường": "technology at school",
+  "Lựa chọn khi mua sắm": "shopping choices",
+  "Cuối tuần trong thành phố": "a weekend in the city",
+  "Học tập trong tương lai": "learning in the future",
+  "Dự án cộng đồng": "a community project",
+  "Thói quen truyền thông": "media habits",
+  "Học tập và công việc": "study and work",
+  "Lựa chọn vì môi trường": "environmental choices",
+  "Văn hóa và bản sắc": "culture and identity",
+};
+
 function testMaterial(test: CambridgePracticeTest, paper: CambridgePracticeTest["papers"][number]) {
-  const theme = test.theme.toLowerCase();
+  const theme = themeEnglish[test.theme] ?? test.theme.toLowerCase();
   const facts = paper.items.filter(item => item.answerKey !== "học viên tự trả lời").map(item => cleanAnswer(item.answerKey));
   if (paper.paper.includes("Nghe")) {
     const detailLines = facts.slice(0, 6).map((fact, index) => `Detail ${index + 1}: ${fact}.`).join(" ");
     return {
-      label: "Nội dung nghe",
+      label: "Listening script",
       text: `Narrator: You will hear a conversation about ${theme}. Listen carefully and answer the questions. Examiner: The speakers are planning an activity. ${detailLines} Speaker A: I think these details are important, so please write them carefully. Speaker B: Yes, I will check the names, numbers, places and objects before we finish.`,
     };
   }
   if (paper.paper.includes("Đọc") || paper.paper.includes("Viết") || paper.paper.includes("Sử dụng")) {
     const readingDetails = facts.slice(0, 8).map((fact, index) => `Point ${index + 1}: ${fact}.`).join(" ");
     return {
-      label: "Nội dung đề",
+      label: "Reading text",
       text: `Read the text. The article is about ${theme}. A group of learners took part in a short project and recorded the most useful information. ${readingDetails} The writer says that good preparation, clear instructions and a careful review helped the group complete the task successfully.`,
     };
   }
   return {
-    label: "Thẻ nói / gợi ý",
+    label: "Speaking card",
     text: `Candidate card: Talk about ${theme}. Say what you can see or imagine, give one reason, and ask or answer a follow-up question. Try to speak clearly and use complete sentences.`,
   };
 }
@@ -328,6 +349,71 @@ function ExamIllustration({ paperName, item }: { test: CambridgePracticeTest; pa
       <p>Use the picture for matching names, finding objects, colouring, or short answers.</p>
     </div>
   </div>;
+}
+
+function examTaskType(item: PracticeItem) {
+  const text = item.taskType.toLowerCase();
+  if (/nối tên|nghe và nối/.test(text)) return "Matching names";
+  if (/viết từ|nghe và viết|hoàn thành ghi chú|điền thông tin|hoàn thành câu/.test(text)) return "Note completion";
+  if (/chọn|trắc nghiệm/.test(text)) return "Multiple choice";
+  if (/tô màu/.test(text)) return "Colouring and writing";
+  if (/đúng\/sai/.test(text)) return "Yes / No";
+  if (/đánh vần/.test(text)) return "Spelling";
+  if (/nối định nghĩa/.test(text)) return "Matching definitions";
+  if (/hội thoại/.test(text)) return "Dialogue completion";
+  if (/điền từ|cấu tạo từ/.test(text)) return "Gap fill";
+  if (/viết lại|biến đổi/.test(text)) return "Key word transformation";
+  if (/email/.test(text)) return "Email writing";
+  if (/viết luận/.test(text)) return "Essay writing";
+  if (/báo cáo|đề xuất|đánh giá/.test(text)) return "Report / proposal / review";
+  if (/mô tả ảnh|nói cá nhân|lượt nói dài/.test(text)) return "Long turn";
+  if (/so sánh|tìm điểm khác nhau/.test(text)) return "Picture comparison";
+  if (/kể chuyện/.test(text)) return "Picture story";
+  if (/trao đổi|thảo luận|nhiệm vụ cộng tác/.test(text)) return "Collaborative task";
+  if (/phỏng vấn/.test(text)) return "Interview";
+  return "Exam task";
+}
+
+function examInstruction(paperName: string, item: PracticeItem) {
+  const paper = paperName.toLowerCase();
+  const task = examTaskType(item);
+  if (paper.includes("nghe")) {
+    if (task === "Matching names") return "Listen to the conversation and match each name to the correct person or picture.";
+    if (task === "Note completion") return "Listen and write the missing word, number, time, place or name.";
+    if (task === "Colouring and writing") return "Listen and follow the instructions to colour, draw or write on the picture.";
+    return "Listen to the recording and choose the correct answer.";
+  }
+  if (paper.includes("đọc") || paper.includes("sử dụng")) {
+    if (task === "Yes / No") return "Look at the picture or read the short text and write yes or no.";
+    if (task === "Matching definitions") return "Match each definition or description with the correct word or text.";
+    if (task === "Dialogue completion") return "Choose the best response to complete the conversation.";
+    if (task === "Key word transformation") return "Complete the second sentence so that it has a similar meaning to the first sentence.";
+    if (task === "Gap fill") return "Read the text and write or choose the best word for each gap.";
+    return "Read the text once, then answer the questions below. Do not repeat the source text in your answer.";
+  }
+  if (paper.includes("viết")) {
+    return "Write your answer in English. Use the prompt, organise your ideas clearly and check grammar and spelling.";
+  }
+  if (task === "Picture comparison") return "Look at the pictures, compare them and answer the examiner's question.";
+  if (task === "Picture story") return "Look at the pictures and tell the story in order.";
+  if (task === "Collaborative task") return "Discuss the options, respond to your partner and try to reach a decision.";
+  if (task === "Long turn") return "Speak for about one minute. Describe what you can see and add a simple opinion or reason.";
+  return "Answer the examiner's question in English using complete sentences.";
+}
+
+function examFocus(item: PracticeItem) {
+  const task = examTaskType(item);
+  if (task === "Matching names") return "names, descriptions and position";
+  if (task === "Note completion") return "numbers, spelling and key details";
+  if (task === "Multiple choice") return "gist, detail and distractors";
+  if (task === "Colouring and writing") return "colours, prepositions and objects";
+  if (task === "Yes / No") return "picture detail and short statements";
+  if (task === "Gap fill") return "grammar, vocabulary and context";
+  if (task === "Key word transformation") return "meaning, structure and accuracy";
+  if (task.includes("writing") || task.includes("Report")) return "content, organisation and language control";
+  if (task.includes("Picture") || task === "Long turn") return "description, comparison and fluency";
+  if (task === "Collaborative task") return "interaction, reasons and turn-taking";
+  return "accuracy, clarity and exam technique";
 }
 
 export default function Home() {
@@ -511,12 +597,12 @@ export default function Home() {
               <div className="test-material paper-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(audioKey, material.text)}>{testAudioKey===audioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>
               <div className="test-items">
                 {paper.items.map(item => <section key={`${paper.paper}-${item.part}`}>
-                  <div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div>
-                  <p>{item.instruction}</p>
+                  <div><strong>{item.part}</strong><em>{examTaskType(item)}</em></div>
+                  <p>{examInstruction(paper.paper, item)}</p>
                   <ExamIllustration test={activePracticeTest} paperName={paper.paper} item={item} />
                   <ul>
-                    <li><b>Câu hỏi:</b> {item.sampleQuestion}</li>
-                    <li><b>Trọng tâm:</b> {item.skillFocus}</li>
+                    <li><b>Question:</b> {item.sampleQuestion}</li>
+                    <li><b>Focus:</b> {examFocus(item)}</li>
                   </ul>
                 </section>)}
               </div>
@@ -535,7 +621,7 @@ export default function Home() {
 
       {activeView === "progress" && <section className="progress-section page-view" id="progress"><div><span className="kicker light">TIẾN BỘ MỖI NGÀY</span><h2>Biết mình đang ở đâu<br/>và cần luyện gì tiếp theo.</h2><p>Theo dõi số phút nghe, lượt nói, từ vựng đã học và mức độ hoàn thành từng kỹ năng.</p><button className="button white" onClick={()=>openView("roadmap")}>Bắt đầu lộ trình miễn phí →</button></div><div className="dashboard"><div className="streak">🔥 <b>7 ngày</b><small>Chuỗi học liên tục</small></div><div className="stats"><span><b>84</b><small>phút nghe</small></span><span><b>36</b><small>lượt nói</small></span><span><b>12</b><small>bài hoàn thành</small></span></div><div className="bars"><p>Nghe <span>72%</span></p><i><b style={{width:"72%"}}/></i><p>Nói <span>58%</span></p><i><b style={{width:"58%"}}/></i></div></div></section>}
 
-      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Mỗi paper có một nội dung đề riêng; câu hỏi bên dưới không lặp lại bài đọc hoặc bài nghe.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => { const material = testMaterial(activePracticeTest, paper); const paperAudioKey = `${activePracticeTest.id}-work-${paper.paper}`; return <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div><div className="test-material paper-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(paperAudioKey, material.text)}>{testAudioKey===paperAudioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div><p>{item.instruction}</p><ExamIllustration test={activePracticeTest} paperName={paper.paper} item={item} /><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Viết câu trả lời để giáo viên hoặc học viên tự chấm theo tiêu chí." : "Nhập đáp án của bạn..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Đúng" : `Chưa đúng. Đáp án/gợi ý: ${item.answerKey}`}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">Câu này cần tự chấm theo trọng tâm: {item.skillFocus}.</p>}</article>; })}</section>; })}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Chấm bài</button>{testChecked && <strong>Kết quả tự động: {testScore}/{gradableItems.length} câu có đáp án cố định</strong>}</footer></div></div>}
+      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Mỗi paper có một nội dung đề riêng; câu hỏi bên dưới không lặp lại bài đọc hoặc bài nghe.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => { const material = testMaterial(activePracticeTest, paper); const paperAudioKey = `${activePracticeTest.id}-work-${paper.paper}`; return <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div><div className="test-material paper-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(paperAudioKey, material.text)}>{testAudioKey===paperAudioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part}</strong><em>{examTaskType(item)}</em></div><p>{examInstruction(paper.paper, item)}</p><ExamIllustration test={activePracticeTest} paperName={paper.paper} item={item} /><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Write your answer in English. Use the exam criteria to self-check." : "Type your answer in English..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Correct" : `Try again. Suggested answer: `}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">This answer should be self-checked. Focus: {examFocus(item)}.</p>}</article>; })}</section>; })}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Check answers</button>{testChecked && <strong>Auto score: {testScore}/{gradableItems.length} fixed-answer questions</strong>}</footer></div></div>}
       {openLesson && detail && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closeDetail}/><div className="lesson-panel"><button className="close" onClick={closeDetail}>×</button><header><span className="lesson-icon">{openLesson.icon}</span><div><span className="pill blue">{openLesson.level} · {openLesson.exam}</span><h2>{openLesson.title}</h2><p>{openLesson.topic} · {openLesson.time}</p></div></header><div className="lesson-tabs"><span>1. Nghe hiểu</span><span>2. Kiểm tra</span><span>3. Luyện nói</span></div><section className="listen-block"><h3>🎧 Bài nghe</h3><div className="accent-picker"><b>Chọn giọng đọc:</b><button className={accent==="en-GB"?"selected":""} onClick={()=>setAccent("en-GB")}>🇬🇧 Anh–Anh</button><button className={accent==="en-US"?"selected":""} onClick={()=>setAccent("en-US")}>🇺🇸 Anh–Mỹ</button></div><div className="audio-player"><button onClick={playLesson}>{lessonAudio?"Ⅱ":"▶"}</button><Wave active={lessonAudio}/><span>{lessonAudio?"Đang phát...":accent==="en-GB"?"Giọng Anh–Anh · 1×":"Giọng Anh–Mỹ · 1×"}</span></div><button className="transcript-toggle" onClick={()=>setShowTranscript(!showTranscript)}>{showTranscript?"Ẩn transcript":"Hiện transcript sau khi nghe"}</button>{showTranscript&&<div className="transcript">{detail.transcript}</div>}</section><section><h3>✅ Câu hỏi nghe hiểu</h3><div className="quiz">{detail.questions.map((q,i)=><article key={q.q}><b>{i+1}. {q.q}</b>{q.options.map((o,j)=><label key={o} className={checked?(j===q.answer?"correct":answers[i]===j?"wrong":""):""}><input type="radio" name={`q${i}`} checked={answers[i]===j} onChange={()=>setAnswers(a=>({...a,[i]:j}))}/>{o}</label>)}{checked&&<p>💡 {q.explain}</p>}</article>)}</div><button className="button primary" onClick={()=>setChecked(true)}>Chấm bài ({Object.keys(answers).length}/3)</button>{checked&&<strong className="score">Kết quả: {detail.questions.filter((q,i)=>answers[i]===q.answer).length}/3 câu đúng</strong>}</section><section className="speaking-practice"><h3>🎙️ Luyện nói & tự chấm</h3><p>{detail.prompt}</p><div className="target">Tiêu chí: {detail.target}</div><button className={`record-button ${speaking?"active":""}`} onClick={recordSpeech}>🎙️ <b>{speaking?"Dừng và lưu bản ghi":"Bắt đầu nói"}</b><small>{speaking?"Đang ghi âm – nhấn để hoàn thành":"Cho phép micro để ghi âm"}</small></button>{speaking&&<Wave active/>}{recordingUrl&&<div className="recording-result"><audio controls src={recordingUrl}/><button onClick={downloadRecording}>⇩ Tải tệp ghi âm</button></div>}{recognisedText&&<div className="ai-feedback"><b>Nhận diện giọng nói: {pronunciationScore}%</b><p>Hệ thống nghe được: “{recognisedText}”</p><small>Điểm dựa trên mức độ nhận diện câu nói; hãy nghe lại bản ghi để tự điều chỉnh âm, nhịp và trọng âm.</small></div>}<p className="privacy-note">Tệp ghi âm chỉ được giữ trong trình duyệt và có thể tải về máy; không tự động tải lên máy chủ.</p></section></div></div>}
       <a className="back-to-top" href="#top" aria-label="Về đầu trang">↑</a>
       <footer className="footer"><div className="brand"><span className="brand-mark">▥</span><span>SpeakUp <b>Cambridge</b></span></div><p>Nền tảng luyện Nghe – Nói theo lộ trình Cambridge và CEFR.</p><span>Nội dung tham khảo cấu trúc Cambridge English; không phải website chính thức của Cambridge.</span></footer>

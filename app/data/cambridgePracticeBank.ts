@@ -45,7 +45,7 @@ function startersTest(index: number): CambridgePracticeTest {
         paper: "Nghe",
         time: "khoảng 20 phút",
         items: [
-          item("Part 1", "Nghe và nối", "Nghe mô tả ngắn và nối tên với người trong tranh.", `Which child is Ben in the ${theme.toLowerCase()} picture?`, "Ben is the boy next to the blue bag.", "tên riêng, màu sắc, vị trí"),
+          item("Part 1", "Nghe và nối", "Nghe mô tả ngắn và nối tên với người trong tranh.", "Which child is Ben in the large picture?", "Ben is the boy next to the blue bag.", "tên riêng, màu sắc, vị trí"),
           item("Part 2", "Nghe và viết", "Nghe hội thoại đơn giản rồi viết tên hoặc số.", "How many books are on the desk?", "5", "số đếm, từ vựng lớp học"),
           item("Part 3", "Nghe và chọn tranh", "Chọn tranh đúng trong ba lựa chọn.", "What does the girl want for lunch?", "sandwich", "từ vựng đồ ăn"),
           item("Part 4", "Nghe và tô màu", "Tô màu hoặc vẽ đồ vật đơn giản theo hướng dẫn.", "Colour the small kite next to the tree.", "small kite = green", "giới từ, màu sắc"),
