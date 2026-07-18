@@ -2,293 +2,248 @@
 
 import { useMemo, useRef, useState } from "react";
 
-const roadmap = [
+const programs = [
   {
-    id: "sound",
-    short: "Stage 1",
-    name: "Sound First",
-    audience: "Tre em moi bat dau",
-    level: "Pre A1",
-    icon: "Aa",
-    color: "yellow",
-    goal: "Nghe va bat chuoc am, tu don, mau cau rat ngan.",
-    listen: "Nhan biet am, tu khoa, so, mau sac, do vat quen thuoc.",
-    speak: "Noi cau 2-5 tu, chao hoi, tra loi Yes/No va cau don.",
-    output: "Co the nghe, chi tranh va noi cau ngan ro am.",
+    id: "kids",
+    label: "Trẻ em",
+    age: "6-11 tuổi",
+    icon: "ABC",
+    promise: "Nghe âm, bắt chước, nói câu ngắn qua tranh và trò chơi.",
+    stages: ["Âm và từ", "Câu ngắn", "Hỏi đáp", "Kể chuyện bằng tranh"],
   },
   {
-    id: "survival",
-    short: "Stage 2",
-    name: "Daily Survival English",
-    audience: "Tre em lon va nguoi moi",
+    id: "teens",
+    label: "Thiếu niên",
+    age: "12-17 tuổi",
+    icon: "CHAT",
+    promise: "Phản xạ hội thoại ở trường, bạn bè, sở thích, học tập và đời sống.",
+    stages: ["Hỏi nhanh", "Trả lời có lý do", "Mô tả tình huống", "Thảo luận ngắn"],
+  },
+  {
+    id: "adults",
+    label: "Người lớn",
+    age: "18+",
+    icon: "WORK",
+    promise: "Dùng tiếng Anh trong công việc, du lịch, dịch vụ, gia đình và xã hội.",
+    stages: ["Giao tiếp sinh tồn", "Hội thoại thực tế", "Trình bày ý", "Thảo luận linh hoạt"],
+  },
+] as const;
+
+const roadmap = [
+  {
+    id: "foundation",
+    level: "A0 - Pre A1",
+    title: "Nghe âm trước, nói theo ngay",
+    goal: "Xây phản xạ âm thanh: nghe được từ khóa và nói câu rất ngắn.",
+    output: "Tự chào hỏi, gọi tên đồ vật, trả lời câu hỏi đơn giản.",
+  },
+  {
+    id: "daily",
     level: "A1",
-    icon: "Hi",
-    color: "green",
-    goal: "Dung tieng Anh cho cac nhu cau hang ngay.",
-    listen: "Hieu cau hoi don gian ve ban than, lop hoc, gia dinh, mua sam.",
-    speak: "Tu gioi thieu, hoi duong, goi mon, noi nhu cau co ban.",
-    output: "Co the giao tiep ngan trong tinh huong quen thuoc.",
+    title: "Sinh hoạt hằng ngày",
+    goal: "Nói được những nhu cầu thật: ăn uống, lớp học, gia đình, thời gian, địa điểm.",
+    output: "Tạo hội thoại 4-6 lượt trong tình huống quen thuộc.",
   },
   {
     id: "story",
-    short: "Stage 3",
-    name: "Picture & Story Speaking",
-    audience: "Tre em, thieu nien",
     level: "A2",
-    icon: "Pic",
-    color: "blue",
-    goal: "Noi bang tranh, chuoi hanh dong va cau chuyen ngan.",
-    listen: "Nghe thong tin chi tiet trong hoi thoai doi song.",
-    speak: "Mo ta tranh, ke lai viec da xay ra, noi ke hoach gan.",
-    output: "Co the noi lien tuc 30-60 giay ve chu de quen.",
+    title: "Mô tả, kể chuyện, hỏi lại",
+    goal: "Nói theo tranh, kể việc đã xảy ra, hỏi lại khi chưa rõ.",
+    output: "Nói liên tục 45-60 giây về một chủ đề đời sống.",
   },
   {
     id: "conversation",
-    short: "Stage 4",
-    name: "Real Conversation",
-    audience: "Thieu nien va nguoi lon",
-    level: "A2+",
-    icon: "Talk",
-    color: "cyan",
-    goal: "Phan xa hoi-dap tu nhien, khong hoc vet tung cau.",
-    listen: "Hieu hoi thoai o truong, nha, cong viec, du lich, dich vu.",
-    speak: "Hoi lai, xac nhan thong tin, dua ly do va de nghi.",
-    output: "Co the duy tri hoi thoai 2-3 phut voi nguoi khac.",
-  },
-  {
-    id: "life",
-    short: "Stage 5",
-    name: "Life Topics",
-    audience: "Thieu nien va nguoi lon",
     level: "B1",
-    icon: "Life",
-    color: "purple",
-    goal: "Dung tieng Anh trong hau het chu de doi song.",
-    listen: "Nam y chinh, thai do, ly do va ket qua trong bai noi ngan.",
-    speak: "Ke trai nghiem, so sanh lua chon, giai thich quan diem.",
-    output: "Co the noi 3-5 phut ve gia dinh, hoc tap, cong viec, xa hoi.",
+    title: "Hội thoại đời sống thật",
+    goal: "Phản xạ trong nhiều bối cảnh: trường học, du lịch, dịch vụ, sức khỏe an toàn, công nghệ.",
+    output: "Duy trì hội thoại 2-3 phút, có lý do và ví dụ.",
   },
   {
     id: "discussion",
-    short: "Stage 6",
-    name: "Opinion & Discussion",
-    audience: "Hoc sinh lon, sinh vien, nguoi di lam",
     level: "B2",
-    icon: "View",
-    color: "coral",
-    goal: "Noi co lap luan, tuong tac va phan hoi linh hoat.",
-    listen: "Hieu quan diem khac nhau, vi du, bang chung, su dong y/bat dong.",
-    speak: "Tranh luan lich su, phat trien y, noi uu/nhuoc diem.",
-    output: "Co the tham gia thao luan va bao ve quan diem ro rang.",
+    title: "Nêu quan điểm và tương tác",
+    goal: "Nghe ý kiến khác nhau, phản hồi, đồng ý, không đồng ý lịch sự.",
+    output: "Thảo luận vấn đề quen thuộc với lập luận rõ.",
   },
   {
-    id: "academic",
-    short: "Stage 7",
-    name: "Academic & Work English",
-    audience: "Nguoi hoc nang cao",
-    level: "C1",
-    icon: "Pro",
-    color: "mint",
-    goal: "Dung tieng Anh cho hoc thuat, thuyet trinh va cong viec.",
-    listen: "Theo doi bai noi dai, cau truc phuc tap, ham y va sac thai.",
-    speak: "Trinh bay, tom tat, thuong luong, dat cau hoi sau.",
-    output: "Co the lam viec va hoc tap bang tieng Anh.",
+    id: "second-language",
+    level: "C1 - C2",
+    title: "Tiếng Anh như ngôn ngữ thứ hai",
+    goal: "Dùng tiếng Anh để học, làm việc, trình bày, thương lượng và suy nghĩ.",
+    output: "Nói tự nhiên, chính xác, linh hoạt theo người nghe và mục đích.",
+  },
+] as const;
+
+const topics = [
+  {
+    id: "family",
+    en: "Family and daily life",
+    vi: "Gia đình và sinh hoạt hằng ngày",
+    level: "A0-A1",
+    track: "kids",
+    lines: [
+      ["Who is in your family?", "Gia đình bạn có những ai?"],
+      ["I live with my parents and my younger sister.", "Tôi sống cùng bố mẹ và em gái."],
+      ["What do you usually do after school?", "Bạn thường làm gì sau giờ học?"],
+      ["I have a snack, do homework, and play for a while.", "Tôi ăn nhẹ, làm bài tập và chơi một lúc."],
+    ],
+    listenTask: "Nghe và chọn đúng người, hoạt động, thời gian.",
+    speakTask: "Nói 5 câu về gia đình và một thói quen mỗi ngày.",
   },
   {
-    id: "fluent",
-    short: "Stage 8",
-    name: "Fluent Second-Language Mode",
-    audience: "Nguoi hoc thanh thao",
-    level: "C2",
-    icon: "C2",
-    color: "indigo",
-    goal: "Bien tieng Anh thanh ngon ngu thu hai trong suy nghi va giao tiep.",
-    listen: "Hieu toc do tu nhien, an y, van phong va ngu canh phuc tap.",
-    speak: "Dien dat chinh xac, tu nhien, linh hoat theo doi tuong va muc dich.",
-    output: "Co the giao tiep gan nhu tu dong trong moi boi canh phu hop.",
+    id: "school",
+    en: "School, friends and learning",
+    vi: "Trường học, bạn bè và việc học",
+    level: "A1-A2",
+    track: "kids",
+    lines: [
+      ["Which subject do you like most?", "Bạn thích môn học nào nhất?"],
+      ["I like science because we do experiments.", "Tôi thích khoa học vì chúng tôi làm thí nghiệm."],
+      ["Can you help me with this exercise?", "Bạn có thể giúp tôi bài này không?"],
+      ["Sure. Let's read the example first.", "Được. Hãy đọc ví dụ trước."],
+    ],
+    listenTask: "Nghe để xác định môn học, lý do và lời đề nghị giúp đỡ.",
+    speakTask: "Đóng vai hỏi bạn về môn học yêu thích và cách học tốt hơn.",
+  },
+  {
+    id: "food",
+    en: "Food, drinks and ordering",
+    vi: "Đồ ăn, thức uống và gọi món",
+    level: "A1-A2",
+    track: "kids",
+    lines: [
+      ["Could I have a bowl of noodles, please?", "Cho tôi một bát mì được không?"],
+      ["Would you like anything to drink?", "Bạn muốn uống gì không?"],
+      ["A glass of orange juice, please.", "Cho tôi một ly nước cam."],
+      ["That's all, thank you.", "Vậy là đủ rồi, cảm ơn."],
+    ],
+    listenTask: "Nghe và ghi món ăn, đồ uống, số lượng.",
+    speakTask: "Thực hành gọi món lịch sự bằng 4 lượt thoại.",
+  },
+  {
+    id: "travel",
+    en: "Travel and directions",
+    vi: "Du lịch và hỏi đường",
+    level: "A2-B1",
+    track: "teens",
+    lines: [
+      ["Excuse me, how can I get to the museum?", "Xin lỗi, tôi đến bảo tàng bằng cách nào?"],
+      ["Go straight and turn left at the traffic lights.", "Đi thẳng và rẽ trái ở đèn giao thông."],
+      ["How long does it take on foot?", "Đi bộ mất bao lâu?"],
+      ["About ten minutes if the street is not busy.", "Khoảng mười phút nếu đường không đông."],
+    ],
+    listenTask: "Nghe chỉ đường và sắp xếp các bước theo đúng thứ tự.",
+    speakTask: "Hỏi đường, xác nhận lại và cảm ơn.",
+  },
+  {
+    id: "feelings",
+    en: "Feelings and communication",
+    vi: "Cảm xúc và giao tiếp",
+    level: "A2-B1",
+    track: "teens",
+    lines: [
+      ["You look worried. What's wrong?", "Bạn trông có vẻ lo. Có chuyện gì vậy?"],
+      ["I have to speak in front of the class tomorrow.", "Ngày mai tôi phải nói trước lớp."],
+      ["Let's practise together for ten minutes.", "Chúng ta luyện cùng nhau mười phút nhé."],
+      ["Thanks. That makes me feel better.", "Cảm ơn. Điều đó làm tôi thấy khá hơn."],
+    ],
+    listenTask: "Nghe để nhận ra cảm xúc, vấn đề và lời hỗ trợ.",
+    speakTask: "Đóng vai động viên bạn bằng tiếng Anh an toàn, tích cực.",
+  },
+  {
+    id: "technology",
+    en: "Technology and media",
+    vi: "Công nghệ và truyền thông",
+    level: "B1-B2",
+    track: "teens",
+    lines: [
+      ["Do you use apps to learn English?", "Bạn có dùng ứng dụng để học tiếng Anh không?"],
+      ["Yes, but I learn better when I speak with someone.", "Có, nhưng tôi học tốt hơn khi nói với ai đó."],
+      ["What should we do after watching a video?", "Sau khi xem video, chúng ta nên làm gì?"],
+      ["We should retell the main idea in our own words.", "Chúng ta nên kể lại ý chính bằng lời của mình."],
+    ],
+    listenTask: "Nghe quan điểm và chọn phương pháp học hiệu quả hơn.",
+    speakTask: "Nêu ý kiến về cách dùng công nghệ để luyện nói.",
+  },
+  {
+    id: "work",
+    en: "Work, teamwork and meetings",
+    vi: "Công việc, làm việc nhóm và họp",
+    level: "B1-B2",
+    track: "adults",
+    lines: [
+      ["Could we start with the main problem?", "Chúng ta bắt đầu với vấn đề chính được không?"],
+      ["The team needs a clearer schedule.", "Nhóm cần một lịch trình rõ ràng hơn."],
+      ["I agree. We should divide the task into smaller steps.", "Tôi đồng ý. Chúng ta nên chia việc thành các bước nhỏ hơn."],
+      ["Great. I'll write the action points.", "Tốt. Tôi sẽ ghi lại các đầu việc cần làm."],
+    ],
+    listenTask: "Nghe để lấy vấn đề chính, giải pháp và người phụ trách.",
+    speakTask: "Mô phỏng họp ngắn: nêu vấn đề, đề xuất, thống nhất bước tiếp theo.",
+  },
+  {
+    id: "community",
+    en: "Community and real-life problems",
+    vi: "Cộng đồng và vấn đề đời sống",
+    level: "B2-C1",
+    track: "adults",
+    lines: [
+      ["What can local people do to make the area cleaner?", "Người dân địa phương có thể làm gì để khu vực sạch hơn?"],
+      ["Small habits matter, but the plan must be easy to follow.", "Thói quen nhỏ rất quan trọng, nhưng kế hoạch phải dễ thực hiện."],
+      ["How can we encourage more people to join?", "Làm sao để khuyến khích nhiều người tham gia hơn?"],
+      ["We can explain the benefits and invite schools and families.", "Chúng ta có thể giải thích lợi ích và mời trường học, gia đình tham gia."],
+    ],
+    listenTask: "Nghe để nhận ra vấn đề, đề xuất và lý do.",
+    speakTask: "Trình bày giải pháp 60-90 giây cho một vấn đề cộng đồng.",
   },
 ] as const;
 
-const lifeDomains = [
-  "Family & relationships",
-  "School & learning",
-  "Food & daily routines",
-  "Home & neighborhood",
-  "Travel & transport",
-  "Shopping & services",
-  "Health & safe habits",
-  "Hobbies & entertainment",
-  "Nature & environment",
-  "Technology & media",
-  "Feelings & communication",
-  "Plans & future goals",
-  "Work & teamwork",
-  "Culture & community",
-  "Problems & solutions",
-  "Ideas & opinions",
-] as const;
-
-const ageTracks = [
-  { id: "kids", label: "Tre em", range: "6-11", focus: "Am thanh, tranh anh, tro choi noi theo mau", icon: "Play" },
-  { id: "teens", label: "Thieu nien", range: "12-17", focus: "Truong hoc, ban be, thuyet trinh ngan, phan xa hoi thoai", icon: "Chat" },
-  { id: "adults", label: "Nguoi lon", range: "18+", focus: "Doi song, cong viec, du lich, thao luan va thuyet trinh", icon: "Work" },
-] as const;
-
-const lessonCycle = [
-  { title: "1. Listen for meaning", detail: "Nghe lan 1 de nam boi canh, nguoi noi va y chinh." },
-  { title: "2. Listen for details", detail: "Nghe lan 2 de bat tu khoa, so lieu, ly do va ket qua." },
-  { title: "3. Chunk & shadow", detail: "Tach 5-8 cum tu, nghe va noi duoi theo dung nhịp." },
-  { title: "4. Guided speaking", detail: "Dung khung cau de noi co chu dich, khong chi lap lai." },
-  { title: "5. Free speaking", detail: "Noi ve ban than, doi vai hoac giai quyet mot tinh huong that." },
-] as const;
-
-const lessonBank = roadmap.flatMap((stage, stageIndex) =>
-  lifeDomains.map((domain, domainIndex) => {
-    const episode = domainIndex + 1;
-    return {
-      id: `${stage.id}-${episode}`,
-      stageId: stage.id,
-      stage: stage.short,
-      level: stage.level,
-      audience: stage.audience,
-      title: `${domain}`,
-      unit: `Unit ${episode}`,
-      time: `${12 + stageIndex * 2 + (domainIndex % 4)} min`,
-      icon: stage.icon,
-      situation: [
-        "asking and answering naturally",
-        "describing a real-life scene",
-        "solving a simple problem",
-        "sharing an opinion with reasons",
-      ][(stageIndex + domainIndex) % 4],
-    };
-  })
-);
-
-type Lesson = (typeof lessonBank)[number];
-
-function lessonContent(lesson: Lesson) {
-  const stageIndex = roadmap.findIndex((stage) => stage.id === lesson.stageId);
-  const beginner = stageIndex <= 1;
-  const developing = stageIndex >= 2 && stageIndex <= 4;
-  const people = beginner ? ["Mia", "Sam"] : developing ? ["Anna", "Ben"] : ["Host", "Guest"];
-  const setting = beginner ? "after class" : developing ? "during a short break" : "in a community discussion";
-  const task = beginner
-    ? "point to three things, say their names, and answer one simple question"
-    : developing
-      ? "explain what happened, give one reason, and ask a follow-up question"
-      : "summarise the issue, compare two options, and give a balanced recommendation";
-  const transcript = beginner
-    ? `${people[0]}: Hi, ${people[1]}. Today we are talking about ${lesson.title.toLowerCase()}. ${people[1]}: I can hear the key words. ${people[0]}: Good. Say one sentence about it. ${people[1]}: I like this topic because it is part of my day.`
-    : developing
-      ? `${people[0]}: We need to talk about ${lesson.title.toLowerCase()} ${setting}. What is the first thing you notice? ${people[1]}: I notice the people are making a choice. They need clear information before they decide. ${people[0]}: What would you ask them? ${people[1]}: I would ask what they need, what they already tried, and what they plan to do next.`
-      : `${people[0]}: Our focus today is ${lesson.title.toLowerCase()}. Why does this topic matter in real life? ${people[1]}: It matters because people often need to understand different perspectives before making a decision. A strong speaker does not only give an answer; they organise ideas, refer to evidence from the situation, and adjust their language for the listener.`;
-  const chunks = beginner
-    ? ["Today we are talking about...", "I can hear...", "Say one sentence", "I like this topic", "part of my day"]
-    : developing
-      ? ["the first thing I notice", "making a choice", "clear information", "what they already tried", "what they plan to do next"]
-      : ["different perspectives", "making a decision", "organise ideas", "refer to evidence", "adjust their language"];
-  const questions = [
-    {
-      q: "What is the lesson mainly about?",
-      options: [lesson.title, "A sports score", "A spelling test"],
-      answer: 0,
-      explain: `The speakers focus on ${lesson.title.toLowerCase()}.`,
-    },
-    {
-      q: beginner ? "What should the learner say?" : developing ? "What do the people need before they decide?" : "What does a strong speaker organise?",
-      options: beginner ? ["One sentence", "A long essay", "Nothing"] : developing ? ["Clear information", "A louder voice", "A new phone"] : ["Ideas", "Shoes", "Colours"],
-      answer: 0,
-      explain: beginner ? "The task is to say one clear sentence." : developing ? "The dialogue says people need clear information." : "The speaker says strong speakers organise ideas.",
-    },
-    {
-      q: "What is the speaking task?",
-      options: [task, "copy a paragraph silently", "translate every word into Vietnamese"],
-      answer: 0,
-      explain: "The lesson moves from listening to active speaking.",
-    },
-  ];
-  return {
-    transcript,
-    chunks,
-    questions,
-    task,
-    criteria: beginner
-      ? "Clear sounds, complete short sentences, confident repetition"
-      : developing
-        ? "Main idea, useful details, follow-up question, natural rhythm"
-        : "Structure, precision, interaction, range of vocabulary, listener awareness",
-  };
-}
+type Topic = (typeof topics)[number];
 
 function Wave({ active = false }: { active?: boolean }) {
-  return <div className={`wave ${active ? "active" : ""}`}>{[12,25,18,36,48,26,55,38,22,42,58,31,17,49,34,24,52,29,40,16,33,45,21,37,27].map((h,i)=><span key={i} style={{height:h}} />)}</div>;
+  return <div className={`wave ${active ? "active" : ""}`}>{[16,28,18,42,52,24,48,33,20,44,58,31,18,46,34,24,52,29,40,16].map((h, i) => <span key={i} style={{ height: h }} />)}</div>;
+}
+
+function buildTranscript(topic: Topic) {
+  return topic.lines.map(([en]) => en).join(" ");
 }
 
 export default function Home() {
-  const [selected, setSelected] = useState("sound");
+  const [program, setProgram] = useState<(typeof programs)[number]["id"]>("kids");
+  const [query, setQuery] = useState("");
+  const [openTopic, setOpenTopic] = useState<Topic | null>(null);
+  const [showVietnamese, setShowVietnamese] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [filter, setFilter] = useState("Tat ca");
-  const [stageFilter, setStageFilter] = useState("Tat ca chang");
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [menu, setMenu] = useState(false);
-  const [openLesson, setOpenLesson] = useState<Lesson | null>(null);
-  const [showTranscript, setShowTranscript] = useState(false);
-  const [answers, setAnswers] = useState<Record<number,number>>({});
-  const [checked, setChecked] = useState(false);
-  const [lessonAudio, setLessonAudio] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
-  const [accent, setAccent] = useState<"en-GB"|"en-US">("en-GB");
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const current = roadmap.find((stage) => stage.id === selected) ?? roadmap[0];
-  const detail = openLesson ? lessonContent(openLesson) : null;
-  const filteredLessons = useMemo(() => lessonBank.filter((lesson) =>
-    (filter === "Tat ca" || lesson.audience.includes(filter)) &&
-    (stageFilter === "Tat ca chang" || lesson.stage === stageFilter) &&
-    (!query || `${lesson.title} ${lesson.level} ${lesson.situation}`.toLowerCase().includes(query.toLowerCase()))
-  ), [filter, stageFilter, query]);
-  const pageSize = 9;
-  const totalPages = Math.max(1, Math.ceil(filteredLessons.length / pageSize));
-  const visibleLessons = filteredLessons.slice((page - 1) * pageSize, page * pageSize);
+  const selectedProgram = programs.find((item) => item.id === program) ?? programs[0];
+  const filteredTopics = useMemo(() => topics.filter((topic) =>
+    topic.track === program &&
+    (!query || `${topic.en} ${topic.vi} ${topic.level}`.toLowerCase().includes(query.toLowerCase()))
+  ), [program, query]);
 
-  const openDetail = (lesson:Lesson) => {
-    setOpenLesson(lesson);
-    setShowTranscript(false);
-    setAnswers({});
-    setChecked(false);
-    setLessonAudio(false);
-    setSpeaking(false);
-  };
-  const closeDetail = () => {
-    window.speechSynthesis?.cancel();
-    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
-    setOpenLesson(null);
-  };
-  const playLesson = () => {
-    if (!detail || !openLesson) return;
+  const playTopic = (topic: Topic) => {
     window.speechSynthesis.cancel();
-    if (lessonAudio) {
-      setLessonAudio(false);
+    if (playing) {
+      setPlaying(false);
       return;
     }
-    const voice = new SpeechSynthesisUtterance(detail.transcript);
-    voice.lang = accent;
-    voice.rate = openLesson.level === "Pre A1" ? 0.78 : openLesson.level === "A1" ? 0.85 : 0.95;
-    voice.onend = () => setLessonAudio(false);
-    setLessonAudio(true);
+    const voice = new SpeechSynthesisUtterance(buildTranscript(topic));
+    voice.lang = "en-GB";
+    voice.rate = topic.level.startsWith("A0") || topic.level.startsWith("A1") ? 0.78 : 0.92;
+    voice.onend = () => setPlaying(false);
+    setPlaying(true);
     window.speechSynthesis.speak(voice);
   };
+
   const recordSpeech = async () => {
-    if (speaking && recorderRef.current) {
+    if (recording && recorderRef.current) {
       recorderRef.current.stop();
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       recorderRef.current = recorder;
       chunksRef.current = [];
@@ -298,87 +253,86 @@ export default function Home() {
         if (recordingUrl) URL.revokeObjectURL(recordingUrl);
         setRecordingUrl(URL.createObjectURL(blob));
         stream.getTracks().forEach((track) => track.stop());
-        setSpeaking(false);
+        setRecording(false);
       };
       recorder.start();
-      setSpeaking(true);
+      setRecording(true);
     } catch {
-      alert("Ban can cho phep micro de ghi am phan noi.");
+      alert("Bạn cần cho phép micro để ghi âm phần nói.");
     }
-  };
-  const downloadRecording = () => {
-    if (!recordingUrl || !openLesson) return;
-    const link = document.createElement("a");
-    link.href = recordingUrl;
-    link.download = `speakup-${openLesson.id}.webm`;
-    link.click();
   };
 
   return (
-    <main>
+    <main id="top">
       <header className="header">
-        <a className="brand" href="#top" aria-label="SpeakUp Life English"><span className="brand-mark">SE</span><span>SpeakUp <b>Life</b></span></a>
-        <button className="menu-button" onClick={()=>setMenu(!menu)} aria-label="Mo menu">☰</button>
-        <nav className={menu ? "open" : ""}>
-          <a href="#roadmap">Lo trinh</a><a href="#tracks">Nhom tuoi</a><a href="#lessons">Chu de doi song</a><a href="#method">Cach hoc</a><a href="#progress">Tien do</a>
+        <a className="brand" href="#top" aria-label="SpeakUp Second Language"><span className="brand-mark">SL</span><span>SpeakUp <b>Second Language</b></span></a>
+        <nav>
+          <a href="#roadmap">Lộ trình</a>
+          <a href="#programs">Chương trình</a>
+          <a href="#topics">Chủ đề</a>
+          <a href="#practice">Phản xạ</a>
         </nav>
-        <a className="hello" href="/login"><span>Dang nhap</span></a>
+        <a className="hello" href="/login">Đăng nhập</a>
       </header>
 
-      <section className="hero" id="top">
+      <section className="hero">
         <div className="hero-copy">
-          <div className="eyebrow">ENGLISH AS A SECOND LANGUAGE</div>
-          <h1>Nghe duoc.<br/><em>Noi duoc.</em><br/>Dung duoc moi ngay.</h1>
-          <p>Lo trinh moi dua nguoi hoc tu con so 0 den giao tiep thanh thao, ap dung cho tre em, thieu nien va nguoi lon qua cac chu de that trong cuoc song.</p>
-          <div className="hero-actions"><a className="button primary" href="#roadmap">Bat dau theo lo trinh</a><a className="button secondary" href="#lessons">Mo chu de hoc</a></div>
-          <div className="trust-row"><span>CEFR A0-C2</span><span>Tre em den nguoi lon</span><span>Nghe + noi trong moi bai</span></div>
+          <div className="eyebrow">NGHE - NÓI PHẢN XẠ</div>
+          <h1>Biến tiếng Anh<br/><em>thành ngôn ngữ thứ hai.</em></h1>
+          <p>Không học theo kho hội thoại lặp lại. Chương trình mới đi từ nghe âm, nói theo, phản xạ hỏi đáp, đến dùng tiếng Anh trong học tập, công việc và đời sống.</p>
+          <div className="hero-actions">
+            <a className="button primary" href="#programs">Chọn chương trình</a>
+            <a className="button secondary" href="#topics">Xem chủ đề song ngữ</a>
+          </div>
+          <div className="trust-row"><span>Tiếng Việt có dấu đầy đủ</span><span>Hội thoại Anh - Việt</span><span>Trẻ em đến người lớn</span></div>
         </div>
         <div className="audio-lab" id="practice">
           <div className="audio-card">
-            <div className="card-top"><div><span className="pill yellow">{current.short} · {current.level}</span><h2>{current.name}</h2></div><span className="big-emoji">{current.icon}</span></div>
+            <div className="card-top"><div><span className="pill yellow">{selectedProgram.label} · {selectedProgram.age}</span><h2>{selectedProgram.promise}</h2></div><span className="big-emoji">{selectedProgram.icon}</span></div>
             <Wave active={playing}/>
-            <div className="player"><button onClick={()=>setPlaying(!playing)}>{playing ? "Ⅱ" : "▶"}</button><div><b>{playing ? "Dang mo phong bai nghe..." : "Nghe mau theo giai doan"}</b><small>{current.listen}</small></div><span>slow · clear · natural</span></div>
-            <div className="sentence"><span>{current.output}</span></div>
+            <div className="player"><button onClick={() => filteredTopics[0] && playTopic(filteredTopics[0])}>{playing ? "Ⅱ" : "▶"}</button><div><b>Nghe mẫu hội thoại thật</b><small>Nghe tiếng Anh trước, mở dịch Việt sau để hiểu sâu.</small></div><span>slow · repeat · speak</span></div>
+            <div className="sentence">Mục tiêu: nghe hiểu nhanh hơn, trả lời tự nhiên hơn, dùng được trong đời sống.</div>
           </div>
           <div className={`speak-card ${recording ? "recording" : ""}`}>
-            <div className="speak-head"><span className="pill mint">Speaking target</span><b>{current.level}<strong>{recording ? "..." : "Ready"}</strong></b></div>
-            <button className="mic" onClick={()=>setRecording(!recording)}>Mic</button>
+            <div className="speak-head"><span className="pill mint">Luyện phản xạ</span><b>Ghi âm<strong>{recording ? "Đang nói" : "Sẵn sàng"}</strong></b></div>
+            <button className="mic" onClick={recordSpeech}>Mic</button>
             <Wave active={recording}/>
-            <p>{recording ? "Dang luyen noi..." : current.speak}</p>
+            <p>Nói lại, đổi thông tin cá nhân, rồi tự nghe để sửa phát âm và độ trôi chảy.</p>
+            {recordingUrl && <audio controls src={recordingUrl}/>}
           </div>
         </div>
       </section>
 
       <section className="level-rail" id="roadmap">
-        <div className="section-heading"><div><span className="kicker">LO TRINH 8 CHANG</span><h2>Tu nguoi moi bat dau den thanh thao</h2></div><p>Moi chang co muc tieu nghe, noi va san pham dau ra ro rang, khong con hoc lan man theo kho bai cu.</p></div>
-        <div className="levels">{roadmap.map((stage)=><button key={stage.id} className={`level ${stage.color} ${selected===stage.id?"selected":""}`} onClick={()=>setSelected(stage.id)}><span>{stage.icon}</span><b>{stage.short}</b><small>{stage.level}</small></button>)}</div>
-        <div className="level-detail"><div className="detail-title"><span>{current.icon}</span><div><small>{current.audience}</small><h3>{current.name}</h3><p>{current.goal}</p></div></div><div><b>Listening</b><p>{current.listen}</p></div><div><b>Speaking</b><p>{current.speak}</p></div><a className="button primary" href="#lessons">Hoc chang nay</a></div>
+        <div className="section-heading"><div><span className="kicker">LỘ TRÌNH TỔNG THỂ</span><h2>Từ người mới bắt đầu đến dùng tiếng Anh tự nhiên</h2></div><p>Mỗi chặng đều có đầu ra nghe - nói rõ ràng, không chỉ học từ vựng rời rạc.</p></div>
+        <div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Đầu ra: {stage.output}</div></div></article>)}</div>
       </section>
 
-      <section className="tracks-section" id="tracks">
-        <div className="section-heading"><div><span className="kicker">NHOM NGUOI HOC</span><h2>Mỗi độ tuổi học cùng mục tiêu, khác cách tiếp cận</h2></div><p>Tre em can tranh va am; thieu nien can tinh huong truong lop; nguoi lon can ung dung vao cong viec va doi song.</p></div>
-        <div className="track-grid">{ageTracks.map((track)=><article key={track.id}><span>{track.icon}</span><b>{track.label}</b><small>{track.range} tuoi</small><p>{track.focus}</p></article>)}</div>
+      <section className="tracks-section" id="programs">
+        <div className="section-heading"><div><span className="kicker">CHƯƠNG TRÌNH THEO ĐỘ TUỔI</span><h2>Cùng một mục tiêu, khác cách học</h2></div><p>Trẻ em cần tranh và âm; thiếu niên cần phản xạ trường lớp; người lớn cần tình huống đời sống và công việc.</p></div>
+        <div className="track-grid">{programs.map((item) => <article key={item.id} className={program === item.id ? "selected-card" : ""} onClick={() => setProgram(item.id)}><span>{item.icon}</span><b>{item.label}</b><small>{item.age}</small><p>{item.promise}</p><ul>{item.stages.map((stage) => <li key={stage}>{stage}</li>)}</ul></article>)}</div>
       </section>
 
-      <section className="method" id="method">
-        <span className="kicker">CAU TRUC MOI CHO MOI BAI</span><h2>Mot bai hoc = nghe hieu + noi duoc</h2><p className="section-sub">Moi bai khong chi co cau hoi. Bai hoc co ngu lieu nghe, cum tu noi, bai tap kiem tra va nhiem vu noi that.</p>
-        <div className="method-grid">{lessonCycle.map((step)=><article key={step.title}><span>{step.title.slice(0,1)}</span><b>{step.title}</b><p>{step.detail}</p></article>)}</div>
+      <section className="method">
+        <span className="kicker">CÔNG THỨC PHẢN XẠ</span><h2>Nghe trước, hiểu nhanh, nói ngay</h2><p className="section-sub">Một bài học không chỉ có câu hỏi. Mỗi bài có đoạn nghe, dịch Việt, cụm nói, phản xạ thay thông tin và nhiệm vụ nói tự do.</p>
+        <div className="method-grid">
+          <article><span>1</span><b>Nghe không nhìn chữ</b><p>Nghe để bắt bối cảnh, người nói, ý chính.</p></article>
+          <article><span>2</span><b>Mở song ngữ</b><p>Đọc câu tiếng Anh kèm dịch Việt để hiểu cách dùng.</p></article>
+          <article><span>3</span><b>Shadowing</b><p>Nói đuổi theo từng cụm, giữ nhịp và âm cuối.</p></article>
+          <article><span>4</span><b>Đổi thành câu của mình</b><p>Thay người, nơi chốn, lý do rồi nói lại ngay.</p></article>
+        </div>
       </section>
 
-      <section className="lesson-section" id="lessons">
-        <div className="section-heading"><div><span className="kicker">CHU DE DOI SONG</span><h2>128 bai nghe-noi moi thay cho kho bai hoc cu</h2><p className="catalog-summary">16 chu de x 8 chang. Moi bai co bai nghe, cau hoi, chunks va nhiem vu noi rieng.</p></div><div className="filters">{["Tat ca","Tre em","Thieu nien","Nguoi lon"].map((item)=><button key={item} className={filter===item?"active":""} onClick={()=>{setFilter(item);setPage(1)}}>{item}</button>)}</div></div>
-        <div className="catalog-tools"><label className="search-box">⌕ <input value={query} onChange={event=>{setQuery(event.target.value);setPage(1)}} placeholder="Tim chu de, tinh huong..." /></label><select value={stageFilter} onChange={event=>{setStageFilter(event.target.value);setPage(1)}}><option>Tat ca chang</option>{roadmap.map((stage)=><option key={stage.short}>{stage.short}</option>)}</select><span><b>{filteredLessons.length}</b> bai phu hop</span></div>
-        <div className="lesson-grid">{visibleLessons.map((lesson)=><article key={lesson.id} onClick={()=>openDetail(lesson)}><div className="lesson-visual"><span>{lesson.icon}</span><button aria-label={`Mo ${lesson.title}`}>▶</button><i>{lesson.stage}</i></div><div className="lesson-body"><div className="lesson-tags"><span className="pill blue">{lesson.level}</span><span>{lesson.unit}</span></div><h3>{lesson.title}</h3><p>{lesson.situation}</p><div className="format">Muc tieu: nghe hieu, shadowing, hoi dap</div><footer><span>{lesson.audience}</span><span>{lesson.time}</span></footer></div></article>)}</div>
-        {visibleLessons.length === 0 && <div className="empty-state">Khong tim thay bai phu hop. Hay doi bo loc hoac tu khoa.</div>}
-        <div className="pagination"><button disabled={page===1} onClick={()=>setPage((value)=>value-1)}>Truoc</button><span>Trang <b>{page}</b> / {totalPages}</span><button disabled={page===totalPages} onClick={()=>setPage((value)=>value+1)}>Sau</button></div>
+      <section className="lesson-section" id="topics">
+        <div className="section-heading"><div><span className="kicker">CHỦ ĐỀ SONG NGỮ</span><h2>{selectedProgram.label}: bài nghe - nói theo đời sống</h2><p className="catalog-summary">Mỗi chủ đề có hội thoại tiếng Anh, dịch tiếng Việt, bài nghe và nhiệm vụ nói phản xạ.</p></div><div className="filters">{programs.map((item) => <button key={item.id} className={program === item.id ? "active" : ""} onClick={() => setProgram(item.id)}>{item.label}</button>)}</div></div>
+        <div className="catalog-tools"><label className="search-box">Tìm <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="chủ đề, bản dịch, cấp độ..." /></label><span><b>{filteredTopics.length}</b> chủ đề phù hợp</span></div>
+        <div className="lesson-grid">{filteredTopics.map((topic) => <article key={topic.id} onClick={() => setOpenTopic(topic)}><div className="lesson-visual"><span>{topic.level}</span><button aria-label={`Mở ${topic.vi}`}>▶</button><i>{selectedProgram.label}</i></div><div className="lesson-body"><div className="lesson-tags"><span className="pill blue">{topic.en}</span></div><h3>{topic.vi}</h3><p>{topic.listenTask}</p><div className="format">Nói: {topic.speakTask}</div><footer><span>Song ngữ Anh - Việt</span><span>12-18 phút</span></footer></div></article>)}</div>
       </section>
 
-      <section className="progress-section" id="progress"><div><span className="kicker light">TIEN BO TUNG BUOC</span><h2>Hoc de bien tieng Anh thanh ngon ngu thu hai.</h2><p>Theo doi so bai nghe, thoi gian noi, do dai cau tra loi va muc do tu tin theo tung chang.</p><a className="button white" href="#roadmap">Quay lai lo trinh</a></div><div className="dashboard"><div className="streak">Step <b>{current.short}</b><small>{current.output}</small></div><div className="stats"><span><b>16</b><small>chu de/chang</small></span><span><b>5</b><small>buoc/bai</small></span><span><b>8</b><small>chang</small></span></div><div className="bars"><p>Listening <span>70%</span></p><i><b style={{width:"70%"}}/></i><p>Speaking <span>65%</span></p><i><b style={{width:"65%"}}/></i></div></div></section>
+      {openTopic && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={() => setOpenTopic(null)}/><div className="lesson-panel"><button className="close" onClick={() => setOpenTopic(null)}>×</button><header><span className="lesson-icon">{openTopic.level}</span><div><span className="pill blue">{openTopic.en}</span><h2>{openTopic.vi}</h2><p>Bài học phản xạ nghe - nói có dịch tiếng Việt.</p></div></header><section className="listen-block"><h3>Bài nghe</h3><div className="audio-player"><button onClick={() => playTopic(openTopic)}>{playing ? "Ⅱ" : "▶"}</button><Wave active={playing}/><span>Nghe tiếng Anh bằng giọng đọc trình duyệt</span></div><button className="transcript-toggle" onClick={() => setShowVietnamese(!showVietnamese)}>{showVietnamese ? "Ẩn dịch tiếng Việt" : "Hiện dịch tiếng Việt"}</button><div className="transcript bilingual-lines">{openTopic.lines.map(([en, vi]) => <p key={en}><b>{en}</b>{showVietnamese && <span>{vi}</span>}</p>)}</div></section><section><h3>Cụm phản xạ</h3><div className="chunk-list">{openTopic.lines.map(([en]) => en.split(" ").slice(0, 5).join(" ")).map((chunk) => <span key={chunk}>{chunk}...</span>)}</div><p><b>Bài nghe:</b> {openTopic.listenTask}</p><p><b>Bài nói:</b> {openTopic.speakTask}</p></section><section className="speaking-practice"><h3>Ghi âm luyện nói</h3><p>Nói lại hội thoại, sau đó đổi thông tin thành câu của bạn. Ví dụ: đổi người, nơi chốn, lý do, thời gian.</p><button className={`record-button ${recording ? "active" : ""}`} onClick={recordSpeech}><b>{recording ? "Dừng và lưu bản ghi" : "Bắt đầu nói"}</b><small>{recording ? "Đang ghi âm" : "Cho phép micro để luyện nói"}</small></button>{recordingUrl && <div className="recording-result"><audio controls src={recordingUrl}/></div>}</section></div></div>}
 
-      <button className="back-top" onClick={()=>window.scrollTo({top:0, behavior:"smooth"})} aria-label="Ve dau trang">↑</button>
-
-      {openLesson && detail && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closeDetail}/><div className="lesson-panel"><button className="close" onClick={closeDetail}>×</button><header><span className="lesson-icon">{openLesson.icon}</span><div><span className="pill blue">{openLesson.stage} · {openLesson.level}</span><h2>{openLesson.title}</h2><p>{openLesson.audience} · {openLesson.time}</p></div></header><div className="lesson-tabs"><span>1. Listening</span><span>2. Chunks</span><span>3. Speaking</span></div><section className="listen-block"><h3>Bai nghe</h3><div className="accent-picker"><b>Giong doc:</b><button className={accent==="en-GB"?"selected":""} onClick={()=>setAccent("en-GB")}>Anh-Anh</button><button className={accent==="en-US"?"selected":""} onClick={()=>setAccent("en-US")}>Anh-My</button></div><div className="audio-player"><button onClick={playLesson}>{lessonAudio?"Ⅱ":"▶"}</button><Wave active={lessonAudio}/><span>{lessonAudio?"Dang phat...":"Bam de nghe noi dung de"}</span></div><button className="transcript-toggle" onClick={()=>setShowTranscript(!showTranscript)}>{showTranscript?"An transcript":"Hien transcript sau khi nghe"}</button>{showTranscript&&<div className="transcript">{detail.transcript}</div>}</section><section><h3>Cau hoi nghe hieu</h3><div className="quiz">{detail.questions.map((question,index)=><article key={question.q}><b>{index+1}. {question.q}</b>{question.options.map((option,optionIndex)=><label key={option} className={checked?(optionIndex===question.answer?"correct":answers[index]===optionIndex?"wrong":""):""}><input type="radio" name={`q${index}`} checked={answers[index]===optionIndex} onChange={()=>setAnswers((value)=>({...value,[index]:optionIndex}))}/>{option}</label>)}{checked&&<p>{question.explain}</p>}</article>)}</div><button className="button primary" onClick={()=>setChecked(true)}>Cham bai ({Object.keys(answers).length}/3)</button>{checked&&<strong className="score">Ket qua: {detail.questions.filter((question,index)=>answers[index]===question.answer).length}/3 cau dung</strong>}</section><section className="speaking-practice"><h3>Chunks & speaking task</h3><div className="chunk-list">{detail.chunks.map((chunk)=><span key={chunk}>{chunk}</span>)}</div><p>{detail.task}</p><div className="target">Tieu chi: {detail.criteria}</div><button className={`record-button ${speaking?"active":""}`} onClick={recordSpeech}><b>{speaking?"Dung va luu ban ghi":"Bat dau noi"}</b><small>{speaking?"Dang ghi am":"Cho phep micro de ghi am"}</small></button>{speaking&&<Wave active/>}{recordingUrl&&<div className="recording-result"><audio controls src={recordingUrl}/><button onClick={downloadRecording}>Tai tep ghi am</button></div>}<p className="privacy-note">Tep ghi am chi giu trong trinh duyet cua ban, khong tu dong tai len may chu.</p></section></div></div>}
-      <footer className="footer"><div className="brand"><span className="brand-mark">SE</span><span>SpeakUp <b>Life</b></span></div><p>Lo trinh luyen nghe-noi tieng Anh theo CEFR, tu nguoi moi bat dau den thanh thao.</p><span>Noi dung tu bien soan, khong sao chep de thi hoac tai lieu co ban quyen.</span></footer>
+      <a className="back-to-top" href="#top" aria-label="Về đầu trang">↑</a>
+      <footer className="footer"><div className="brand"><span className="brand-mark">SL</span><span>SpeakUp <b>Second Language</b></span></div><p>Chương trình luyện nghe - nói phản xạ, hướng tới dùng tiếng Anh như ngôn ngữ thứ hai.</p><span>Nội dung tự biên soạn, có dịch tiếng Việt để hỗ trợ hiểu và luyện nói.</span></footer>
     </main>
   );
 }
