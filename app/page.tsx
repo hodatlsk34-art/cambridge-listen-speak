@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { cambridgePracticeBank } from "./data/cambridgePracticeBank";
 
 const levels = [
   { id: "pre-a1", short: "Pre A1", name: "Starters", icon: "🦁", color: "yellow", age: "6–8 tuổi", listen: "Nghe từ, số và mô tả ngắn", speak: "Chào hỏi, gọi tên và trả lời đơn" },
   { id: "a1", short: "A1", name: "Movers", icon: "🐢", color: "green", age: "7–10 tuổi", listen: "Hiểu hội thoại và chỉ dẫn đơn giản", speak: "Mô tả tranh, kể chuyện rất ngắn" },
-  { id: "a2y", short: "A2", name: "Flyers", icon: "🐬", color: "blue", age: "9–12 tuổi", listen: "Nghe chi tiết trong hội thoại quen thuộc", speak: "So sánh tranh, kể chuyện và trao đổi" },
+  { id: "a2y", short: "A2", name: "Flyers", icon: "🐬", color: "blue", age: "9–12 tuổi", listen: "Nghe detail trong hội thoại quen thuộc", speak: "So sánh tranh, kể chuyện và trao đổi" },
   { id: "a2", short: "A2", name: "Key", icon: "🚀", color: "cyan", age: "Thiếu niên · người lớn", listen: "Thông tin chính trong tình huống hằng ngày", speak: "Hỏi đáp và thảo luận chủ đề quen thuộc" },
-  { id: "b1", short: "B1", name: "Preliminary", icon: "🐼", color: "purple", age: "Thiếu niên · người lớn", listen: "Nắm ý chính, thái độ và chi tiết", speak: "Phỏng vấn, mô tả và thảo luận" },
+  { id: "b1", short: "B1", name: "Preliminary", icon: "🐼", color: "purple", age: "Thiếu niên · người lớn", listen: "Nắm ý chính, thái độ và detail", speak: "Phỏng vấn, mô tả và thảo luận" },
   { id: "b2", short: "B2", name: "First", icon: "🦊", color: "coral", age: "Thiếu niên · người lớn", listen: "Hiểu nhiều người nói và quan điểm", speak: "So sánh, lập luận và tương tác tự nhiên" },
   { id: "c1", short: "C1", name: "Advanced", icon: "🦉", color: "mint", age: "Người lớn · học thuật", listen: "Theo dõi bài nói dài và hàm ý", speak: "Trình bày, thương lượng và phát triển ý" },
   { id: "c2", short: "C2", name: "Proficiency", icon: "🦅", color: "indigo", age: "Người lớn · chuyên sâu", listen: "Hiểu sắc thái, tốc độ tự nhiên", speak: "Diễn đạt chính xác, linh hoạt và tinh tế" },
@@ -21,14 +22,14 @@ const cambridgeExamFormats = [
     age: "6–8 tuổi",
     description: "Làm quen tiếng Anh qua tranh, từ vựng quen thuộc, câu trả lời ngắn và tương tác đơn giản.",
     papers: [
-      { name: "Listening", time: "khoảng 20 phút", parts: 4, tasks: ["Nối tên với tranh", "Viết từ hoặc số", "Chọn tranh đúng", "Tô màu hoặc vẽ theo hướng dẫn"] },
-      { name: "Reading & Writing", time: "khoảng 20 phút", parts: 5, tasks: ["Đúng/sai theo tranh", "Viết từ đơn giản", "Chọn từ phù hợp", "Hoàn thành đoạn ngắn", "Trả lời câu hỏi theo tranh"] },
-      { name: "Speaking", time: "3–5 phút", parts: 4, tasks: ["Tìm đồ vật trong tranh", "Trả lời câu hỏi cá nhân", "Nói từ/câu ngắn", "Gọi tên đồ vật quen thuộc"] },
+      { name: "Nghe", time: "khoảng 20 phút", parts: 4, tasks: ["Nối tên với tranh", "Viết từ hoặc số", "Chọn tranh đúng", "Tô màu hoặc vẽ theo hướng dẫn"] },
+      { name: "Đọc và Viết", time: "khoảng 20 phút", parts: 5, tasks: ["Đúng/sai theo tranh", "Viết từ đơn giản", "Chọn từ phù hợp", "Hoàn thành đoạn ngắn", "Trả lời câu hỏi theo tranh"] },
+      { name: "Nói", time: "3–5 phút", parts: 4, tasks: ["Tìm đồ vật trong tranh", "Trả lời câu hỏi cá nhân", "Nói từ/câu ngắn", "Gọi tên đồ vật quen thuộc"] },
     ],
     practice: [
-      { title: "Picture Choice", skill: "Listening", sample: "Nghe câu mô tả và chọn đúng con vật/đồ vật trong tranh." },
-      { title: "One-word Answer", skill: "Reading & Writing", sample: "Nhìn tranh và viết một từ: apple, chair, school, blue..." },
-      { title: "Point and Say", skill: "Speaking", sample: "Chỉ vào đồ vật trong tranh và trả lời: What is this? What colour is it?" },
+      { title: "Chọn tranh đúng", skill: "Nghe", sample: "Nghe câu mô tả và chọn đúng con vật/đồ vật trong tranh." },
+      { title: "Trả lời một từ", skill: "Đọc và Viết", sample: "Nhìn tranh và viết một từ: apple, chair, school, blue..." },
+      { title: "Chỉ tranh và nói", skill: "Nói", sample: "Chỉ vào đồ vật trong tranh và trả lời: What is this? What colour is it?" },
     ],
   },
   {
@@ -38,14 +39,14 @@ const cambridgeExamFormats = [
     age: "7–10 tuổi",
     description: "Tăng khả năng hiểu hội thoại ngắn, mô tả tranh và kể câu chuyện đơn giản.",
     papers: [
-      { name: "Listening", time: "khoảng 25 phút", parts: 5, tasks: ["Nối người với tên", "Điền từ/số", "Chọn tranh", "Hoàn thành ghi chú", "Tô màu và viết"] },
-      { name: "Reading & Writing", time: "khoảng 30 phút", parts: 6, tasks: ["Nối định nghĩa", "Hoàn thành hội thoại", "Chọn từ cho truyện", "Hoàn thành văn bản ngắn", "Viết câu theo tranh"] },
-      { name: "Speaking", time: "5–7 phút", parts: 4, tasks: ["Tìm điểm khác nhau", "Kể chuyện theo tranh", "Chọn vật khác nhóm", "Trả lời câu hỏi cá nhân"] },
+      { name: "Nghe", time: "khoảng 25 phút", parts: 5, tasks: ["Nối người với tên", "Điền từ/số", "Chọn tranh", "Hoàn thành ghi chú", "Tô màu và viết"] },
+      { name: "Đọc và Viết", time: "khoảng 30 phút", parts: 6, tasks: ["Nối định nghĩa", "Hoàn thành hội thoại", "Chọn từ cho truyện", "Hoàn thành văn bản ngắn", "Viết câu theo tranh"] },
+      { name: "Nói", time: "5–7 phút", parts: 4, tasks: ["Tìm điểm khác nhau", "Kể chuyện theo tranh", "Chọn vật khác nhóm", "Trả lời câu hỏi cá nhân"] },
     ],
     practice: [
-      { title: "Names and People", skill: "Listening", sample: "Nghe mô tả và nối từng bạn nhỏ với đúng tên." },
-      { title: "Story Gap Fill", skill: "Reading & Writing", sample: "Đọc câu chuyện ngắn và chọn từ còn thiếu." },
-      { title: "Four-picture Story", skill: "Speaking", sample: "Kể lại câu chuyện từ 4 tranh theo thứ tự." },
+      { title: "Nối tên với người", skill: "Nghe", sample: "Nghe mô tả và nối từng bạn nhỏ với đúng tên." },
+      { title: "Điền từ vào truyện", skill: "Đọc và Viết", sample: "Đọc câu chuyện ngắn và chọn từ còn thiếu." },
+      { title: "Kể chuyện 4 tranh", skill: "Nói", sample: "Kể lại câu chuyện từ 4 tranh theo thứ tự." },
     ],
   },
   {
@@ -53,16 +54,16 @@ const cambridgeExamFormats = [
     level: "A2",
     exam: "Flyers",
     age: "9–12 tuổi",
-    description: "Luyện nghe chi tiết, đọc hiểu văn bản ngắn và nói thành đoạn rõ ý.",
+    description: "Luyện nghe detail, đọc hiểu văn bản ngắn và nói thành đoạn rõ ý.",
     papers: [
-      { name: "Listening", time: "khoảng 25 phút", parts: 5, tasks: ["Nối tên", "Hoàn thành ghi chú", "Chọn tranh", "Hoàn thành đoạn văn", "Tô màu và viết"] },
-      { name: "Reading & Writing", time: "khoảng 40 phút", parts: 7, tasks: ["Nối định nghĩa", "Hoàn thành hội thoại", "Điền từ cho truyện", "Ngữ pháp trong đoạn văn", "Viết câu trả lời ngắn", "Viết đoạn theo gợi ý"] },
-      { name: "Speaking", time: "7–9 phút", parts: 4, tasks: ["Tìm điểm khác nhau", "Hỏi đáp thông tin", "Kể chuyện theo tranh", "Câu hỏi cá nhân mở rộng"] },
+      { name: "Nghe", time: "khoảng 25 phút", parts: 5, tasks: ["Nối tên", "Hoàn thành ghi chú", "Chọn tranh", "Hoàn thành đoạn văn", "Tô màu và viết"] },
+      { name: "Đọc và Viết", time: "khoảng 40 phút", parts: 7, tasks: ["Nối định nghĩa", "Hoàn thành hội thoại", "Điền từ cho truyện", "Ngữ pháp trong đoạn văn", "Viết câu trả lời ngắn", "Viết đoạn theo gợi ý"] },
+      { name: "Nói", time: "7–9 phút", parts: 4, tasks: ["Tìm điểm khác nhau", "Hỏi đáp thông tin", "Kể chuyện theo tranh", "Câu hỏi cá nhân mở rộng"] },
     ],
     practice: [
-      { title: "Information Exchange", skill: "Speaking", sample: "Hỏi và trả lời để hoàn thành bảng thông tin." },
-      { title: "Short Text Questions", skill: "Reading", sample: "Đọc thông báo, email hoặc truyện ngắn rồi trả lời." },
-      { title: "Note Completion", skill: "Listening", sample: "Nghe thông tin về lớp học/chuyến đi và điền chi tiết còn thiếu." },
+      { title: "Trao đổi thông tin", skill: "Nói", sample: "Hỏi và trả lời để hoàn thành bảng thông tin." },
+      { title: "Câu hỏi văn bản ngắn", skill: "Đọc", sample: "Đọc thông báo, email hoặc truyện ngắn rồi trả lời." },
+      { title: "Hoàn thành ghi chú", skill: "Nghe", sample: "Nghe thông tin về lớp học/chuyến đi và điền detail còn thiếu." },
     ],
   },
   {
@@ -72,14 +73,14 @@ const cambridgeExamFormats = [
     age: "Thiếu niên · người lớn",
     description: "Dành cho người học giao tiếp cơ bản trong tình huống đời sống, học tập và du lịch.",
     papers: [
-      { name: "Reading & Writing", time: "60 phút", parts: 7, tasks: ["Trắc nghiệm đọc hiểu", "Nối thông tin", "Điền từ", "Viết email ngắn", "Viết truyện hoặc bài ngắn"] },
-      { name: "Listening", time: "khoảng 30 phút", parts: 5, tasks: ["Chọn đáp án", "Điền thông tin", "Nối người/chủ đề"] },
-      { name: "Speaking", time: "8–10 phút", parts: 2, tasks: ["Hỏi đáp cá nhân", "Trao đổi theo chủ đề với bạn thi"] },
+      { name: "Đọc và Viết", time: "60 phút", parts: 7, tasks: ["Trắc nghiệm đọc hiểu", "Nối thông tin", "Điền từ", "Viết email ngắn", "Viết truyện hoặc bài ngắn"] },
+      { name: "Nghe", time: "khoảng 30 phút", parts: 5, tasks: ["Chọn đáp án", "Điền thông tin", "Nối người/chủ đề"] },
+      { name: "Nói", time: "8–10 phút", parts: 2, tasks: ["Hỏi đáp cá nhân", "Trao đổi theo chủ đề với bạn thi"] },
     ],
     practice: [
-      { title: "Short Email", skill: "Writing", sample: "Viết email 25+ từ trả lời lời mời hoặc kế hoạch." },
-      { title: "Daily Situations", skill: "Listening", sample: "Nghe hội thoại ở nhà ga, lớp học, cửa hàng, trung tâm thể thao." },
-      { title: "Collaborative Talk", skill: "Speaking", sample: "Trao đổi lựa chọn hoạt động cuối tuần và giải thích lý do." },
+      { title: "Viết email ngắn", skill: "Viết", sample: "Viết email 25+ từ trả lời lời mời hoặc kế hoạch." },
+      { title: "Tình huống hằng ngày", skill: "Nghe", sample: "Nghe hội thoại ở nhà ga, lớp học, cửa hàng, trung tâm thể thao." },
+      { title: "Trao đổi theo cặp", skill: "Nói", sample: "Trao đổi lựa chọn hoạt động cuối tuần và giải thích lý do." },
     ],
   },
   {
@@ -89,15 +90,15 @@ const cambridgeExamFormats = [
     age: "Thiếu niên · người lớn",
     description: "Tập trung đọc hiểu nhiều dạng văn bản, viết email/bài ngắn và nói có phát triển ý.",
     papers: [
-      { name: "Reading", time: "45 phút", parts: 6, tasks: ["Trắc nghiệm", "Nối thông tin", "Điền câu vào đoạn", "Điền từ theo ngữ cảnh", "Điền từ mở"] },
-      { name: "Writing", time: "45 phút", parts: 2, tasks: ["Viết email", "Viết bài báo hoặc câu chuyện"] },
-      { name: "Listening", time: "khoảng 30 phút", parts: 4, tasks: ["Chọn đáp án", "Điền ghi chú", "Hiểu ý chính và thái độ"] },
-      { name: "Speaking", time: "10–12 phút", parts: 4, tasks: ["Phỏng vấn", "Mô tả ảnh", "Thảo luận", "Trả lời câu hỏi mở rộng"] },
+      { name: "Đọc", time: "45 phút", parts: 6, tasks: ["Trắc nghiệm", "Nối thông tin", "Điền câu vào đoạn", "Điền từ theo ngữ cảnh", "Điền từ mở"] },
+      { name: "Viết", time: "45 phút", parts: 2, tasks: ["Viết email", "Viết bài báo hoặc câu chuyện"] },
+      { name: "Nghe", time: "khoảng 30 phút", parts: 4, tasks: ["Chọn đáp án", "Điền ghi chú", "Hiểu ý chính và thái độ"] },
+      { name: "Nói", time: "10–12 phút", parts: 4, tasks: ["Phỏng vấn", "Mô tả ảnh", "Thảo luận", "Trả lời câu hỏi mở rộng"] },
     ],
     practice: [
-      { title: "Photo Description", skill: "Speaking", sample: "Mô tả ảnh trong 45 giây: nơi chốn, người, hoạt động, cảm xúc." },
-      { title: "Opinion Email", skill: "Writing", sample: "Viết email 100 từ nêu ý kiến và đề xuất." },
-      { title: "Gapped Text", skill: "Reading", sample: "Chọn câu phù hợp để hoàn thành đoạn văn." },
+      { title: "Mô tả ảnh", skill: "Nói", sample: "Mô tả ảnh trong 45 giây: nơi chốn, người, hoạt động, cảm xúc." },
+      { title: "Email nêu ý kiến", skill: "Viết", sample: "Viết email 100 từ nêu ý kiến và đề xuất." },
+      { title: "Điền câu vào đoạn văn", skill: "Đọc", sample: "Chọn câu phù hợp để hoàn thành đoạn văn." },
     ],
   },
   {
@@ -107,21 +108,38 @@ const cambridgeExamFormats = [
     age: "Thiếu niên · người lớn",
     description: "Củng cố năng lực học thuật và giao tiếp độc lập: lập luận, so sánh, viết có cấu trúc.",
     papers: [
-      { name: "Reading & Use of English", time: "75 phút", parts: 7, tasks: ["Multiple-choice cloze", "Open cloze", "Word formation", "Key word transformation", "Reading multiple choice", "Gapped text", "Multiple matching"] },
-      { name: "Writing", time: "80 phút", parts: 2, tasks: ["Essay bắt buộc", "Article, email, report hoặc review"] },
-      { name: "Listening", time: "khoảng 40 phút", parts: 4, tasks: ["Trắc nghiệm", "Hoàn thành câu", "Nối người với ý kiến"] },
-      { name: "Speaking", time: "12–14 phút", parts: 4, tasks: ["Interview", "Long turn", "Collaborative task", "Discussion"] },
+      { name: "Đọc & Sử dụng tiếng Anh", time: "75 phút", parts: 7, tasks: ["Điền từ trắc nghiệm", "Điền từ mở", "Cấu tạo từ", "Viết lại câu với từ khóa", "Trắc nghiệm đọc hiểu", "Điền câu vào đoạn văn", "Nối thông tin nhiều lựa chọn"] },
+      { name: "Viết", time: "80 phút", parts: 2, tasks: ["Viết luận bắt buộc", "Viết bài/email/báo cáo/đánh giá"] },
+      { name: "Nghe", time: "khoảng 40 phút", parts: 4, tasks: ["Trắc nghiệm", "Hoàn thành câu", "Nối người với ý kiến"] },
+      { name: "Nói", time: "12–14 phút", parts: 4, tasks: ["Phỏng vấn", "Nói cá nhân dài", "Trao đổi theo cặp", "Thảo luận"] },
     ],
     practice: [
-      { title: "Key Word Transformation", skill: "Use of English", sample: "Viết lại câu giữ nguyên nghĩa bằng từ khóa cho sẵn." },
-      { title: "Balanced Essay", skill: "Writing", sample: "Viết essay có mở bài, hai luận điểm, ví dụ và kết luận." },
-      { title: "Compare and Speculate", skill: "Speaking", sample: "So sánh hai ảnh, suy đoán tình huống và nêu lựa chọn." },
+      { title: "Viết lại câu với từ khóa", skill: "Sử dụng tiếng Anh", sample: "Viết lại câu giữ nguyên nghĩa bằng từ khóa cho sẵn." },
+      { title: "Viết luận cân đối", skill: "Viết", sample: "Viết bài luận có mở bài, hai luận điểm, ví dụ và kết luận." },
+      { title: "So sánh và suy đoán", skill: "Nói", sample: "So sánh hai ảnh, suy đoán tình huống và nêu lựa chọn." },
     ],
   },
 ];
 
 const lessonTopics = [
-  ["Family & Friends","Gia đình và bạn bè","👨‍👩‍👧"],["At School","Trường học và lớp học","🏫"],["Food & Drinks","Đồ ăn và thức uống","🍎"],["Animals Around Us","Động vật quanh em","🦁"],["My Home","Nhà cửa và đồ vật","🏠"],["Daily Routines","Sinh hoạt hằng ngày","⏰"],["Fun & Games","Trò chơi và sở thích","⚽"],["Weather & Clothes","Thời tiết và trang phục","🌦️"],["Around Town","Địa điểm trong thành phố","🏙️"],["Travel & Transport","Du lịch và phương tiện","🚌"],["Health & Wellbeing","Sức khỏe và thói quen tốt","🌿"],["Shopping Smart","Mua sắm và lựa chọn","🛍️"],["Nature & Environment","Thiên nhiên và môi trường","🌳"],["Study & Work","Học tập và công việc","💼"],["Technology Today","Công nghệ trong cuộc sống","💻"],["Culture & Media","Văn hóa và truyền thông","🎬"],["Ideas & Opinions","Ý kiến và thảo luận","💡"],["The Future","Dự đoán và kế hoạch","🚀"]
+  ["Gia đình và bạn bè","Gia đình và bạn bè","family and friends","👨‍👩‍👧"],
+  ["Ở trường học","Trường học và lớp học","school and classroom objects","🏫"],
+  ["Đồ ăn và thức uống","Đồ ăn và thức uống","food and drinks","🍎"],
+  ["Động vật quanh em","Động vật quanh em","animals around us","🦁"],
+  ["Ngôi nhà của em","Nhà cửa và đồ vật","homes and furniture","🏠"],
+  ["Sinh hoạt hằng ngày","Sinh hoạt hằng ngày","daily routines","⏰"],
+  ["Trò chơi và sở thích","Trò chơi và sở thích","games and hobbies","⚽"],
+  ["Thời tiết và trang phục","Thời tiết và trang phục","weather and clothes","🌦️"],
+  ["Địa điểm trong thành phố","Địa điểm trong thành phố","places around town","🏙️"],
+  ["Du lịch và phương tiện","Du lịch và phương tiện","travel and transport","🚌"],
+  ["Sức khỏe và thói quen tốt","Sức khỏe và thói quen tốt","health and good habits","🌿"],
+  ["Mua sắm thông minh","Mua sắm và lựa chọn","shopping and choices","🛍️"],
+  ["Thiên nhiên và môi trường","Thiên nhiên và môi trường","nature and the environment","🌳"],
+  ["Học tập và công việc","Học tập và công việc","study and work","💼"],
+  ["Công nghệ hôm nay","Công nghệ trong cuộc sống","technology in daily life","💻"],
+  ["Văn hóa và truyền thông","Văn hóa và truyền thông","culture and media","🎬"],
+  ["Ý kiến và thảo luận","Ý kiến và thảo luận","ideas and opinions","💡"],
+  ["Tương lai và kế hoạch","Dự đoán và kế hoạch","future plans","🚀"]
 ] as const;
 const lessonFormats = ["Nghe chọn tranh","Nghe điền thông tin","Nghe xác định ý chính","Nghe nhận biết thái độ","Nói theo mẫu","Mô tả tranh","Đóng vai hội thoại","Thảo luận và phản biện"];
 const levelCatalog = [
@@ -131,7 +149,7 @@ const levelCatalog = [
 const lessons = levelCatalog.flatMap(([level, exam, type, base], levelIndex) =>
   Array.from({length:35}, (_, index) => {
     const topic = lessonTopics[(index + levelIndex * 2) % lessonTopics.length];
-    return { id:`${levelIndex + 1}-${index + 1}`, level, exam, title:`${topic[0]} ${Math.floor(index / lessonTopics.length) + 1}`, topic:topic[1], time:`${base + index % 6} phút`, type, icon:topic[2], format:lessonFormats[(index + levelIndex) % lessonFormats.length], skill:index % 3 === 0 ? "Nghe" : index % 3 === 1 ? "Nói" : "Nghe + Nói" };
+    return { id:`${levelIndex + 1}-${index + 1}`, level, exam, title:`${topic[0]} ${Math.floor(index / lessonTopics.length) + 1}`, topic:topic[1], englishTopic:topic[2], time:`${base + index % 6} phút`, type, icon:topic[3], format:lessonFormats[(index + levelIndex) % lessonFormats.length], skill:index % 3 === 0 ? "Nghe" : index % 3 === 1 ? "Nói" : "Nghe + Nói" };
   })
 );
 
@@ -143,17 +161,18 @@ type Lesson = (typeof lessons)[number];
 function lessonContent(lesson: Lesson) {
   const advanced = ["B2","C1","C2"].some(x => lesson.level.startsWith(x));
   const mid = lesson.level.startsWith("B1") || lesson.level.startsWith("A2 Key");
+  const englishTopic = lesson.englishTopic;
   const transcript = advanced
-    ? `Host: Today we are exploring ${lesson.topic.toLowerCase()} and the way it influences everyday decisions. Speaker: In my experience, small choices can have a surprisingly significant effect. Although people may disagree about the best approach, listening carefully helps us understand the reasons behind each opinion. Host: What would you recommend? Speaker: I would begin with a practical goal, review the results, and then adapt the plan rather than expecting an immediate perfect solution.`
+    ? `Host: Today we are exploring ${englishTopic} and the way it influences everyday decisions. Speaker: In my experience, small choices can have a surprisingly significant effect. Although people may disagree about the best approach, listening carefully helps us understand the reasons behind each opinion. Host: What would you recommend? Speaker: I would begin with a practical goal, review the results, and then adapt the plan rather than expecting an immediate perfect solution.`
     : mid
-    ? `Anna: Hi Ben. Our topic today is ${lesson.topic.toLowerCase()}. What do you think? Ben: I think it is useful because it is part of everyday life. Anna: Can you give me an example? Ben: Yes. Yesterday I made a simple plan, asked two friends for advice, and then chose the best option. Anna: That sounds sensible. I will try the same idea next time.`
-    : `Lucy: Hello, Tom! Today we are learning about ${lesson.topic.toLowerCase()}. Tom: Great! I can see three things in the picture. Lucy: What is your favourite one? Tom: I like the blue one. It is small and friendly. Lucy: Let us listen, point, and say the words together.`;
+    ? `Anna: Hi Ben. Our topic today is ${englishTopic}. What do you think? Ben: I think it is useful because it is part of everyday life. Anna: Can you give me an example? Ben: Yes. Yesterday I made a simple plan, asked two friends for advice, and then chose the best option. Anna: That sounds sensible. I will try the same idea next time.`
+    : `Lucy: Hello, Tom! Today we are learning about ${englishTopic}. Tom: Great! I can see three things in the picture. Lucy: What is your favourite one? Tom: I like the blue one. It is small and friendly. Lucy: Let us listen, point, and say the words together.`;
   const questions = [
-    { q:"What is the main topic of the conversation?", options:[lesson.topic,"A difficult examination","A sports result"], answer:0, explain:`The speakers introduce ${lesson.topic.toLowerCase()} as their main topic.` },
-    { q:advanced ? "What does the speaker recommend?" : "How many things can Tom see?", options:advanced?["Set a goal, review and adapt","Avoid making a plan","Expect a perfect result immediately"]:["Two","Three","Five"], answer:advanced?0:1, explain:advanced?"The speaker recommends a gradual, reflective approach.":"Tom says that he can see three things." },
-    { q:mid ? "Who did Ben ask for advice?" : advanced ? "Why is careful listening useful?" : "Which one does Tom like?", options:mid?["Two friends","His teacher","Nobody"]:advanced?["It reveals reasons behind opinions","It ends every disagreement","It makes decisions immediate"]:["The blue one","The red one","The big one"], answer:0, explain:mid?"Ben says he asked two friends for advice.":advanced?"The speaker says listening helps people understand the reasons behind different opinions.":"Tom says he likes the blue one." }
+    { q:"What is the main topic of the conversation?", options:[englishTopic,"a difficult examination","a sports result"], answer:0, explain:`Người nói giới thiệu ${englishTopic} là chủ đề chính.` },
+    { q:advanced ? "What does the speaker recommend?" : "How many things can Tom see?", options:advanced?["Set a goal, review and adapt","Avoid making a plan","Expect a perfect result immediately"]:["Two","Three","Five"], answer:advanced?0:1, explain:advanced?"Người nói khuyên nên đặt mục tiêu, xem lại kết quả rồi điều chỉnh dần.":"Tom nói rằng bạn ấy nhìn thấy ba đồ vật." },
+    { q:mid ? "Who did Ben ask for advice?" : advanced ? "Why is careful listening useful?" : "Which one does Tom like?", options:mid?["Two friends","His teacher","Nobody"]:advanced?["It reveals reasons behind opinions","It ends every disagreement","It makes decisions immediate"]:["The blue one","The red one","The big one"], answer:0, explain:mid?"Ben nói rằng bạn ấy đã hỏi ý kiến hai người bạn.":advanced?"Nghe kỹ giúp hiểu lý do phía sau các ý kiến khác nhau.":"Tom nói rằng bạn ấy thích đồ vật màu xanh." }
   ];
-  return { transcript, questions, prompt: advanced ? `Give a 60–90 second response about ${lesson.topic.toLowerCase()}. State your view, give an example, acknowledge another perspective and conclude.` : mid ? `Talk for 45 seconds about ${lesson.topic.toLowerCase()}. Give your opinion and two supporting details.` : `Look at the picture and say 4–6 simple sentences about ${lesson.topic.toLowerCase()}.`, target: advanced ? "Fluency · range · coherence · pronunciation" : mid ? "Clear ideas · linking words · pronunciation" : "Key words · complete sentences · clear sounds" };
+  return { transcript, questions, prompt: advanced ? `Give a 60-90 second response about ${englishTopic}. State your view, give an example, acknowledge another perspective and conclude.` : mid ? `Talk for 45 seconds about ${englishTopic}. Give your opinion and two supporting details.` : `Look at the picture and say 4-6 simple sentences about ${englishTopic}.`, target: advanced ? "Độ trôi chảy · độ đa dạng từ vựng · liên kết ý · phát âm" : mid ? "Ý rõ ràng · từ nối · phát âm" : "Từ khóa đúng · câu hoàn chỉnh · âm rõ" };
 }
 
 export default function Home() {
@@ -173,6 +192,7 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [accent, setAccent] = useState<"en-GB"|"en-US">("en-GB");
   const [examLevelId, setExamLevelId] = useState("pre-a1");
+  const [practiceTestId, setPracticeTestId] = useState("starters-practice-1");
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [recognisedText, setRecognisedText] = useState("");
   const [pronunciationScore, setPronunciationScore] = useState<number | null>(null);
@@ -180,6 +200,8 @@ export default function Home() {
   const chunksRef = useRef<Blob[]>([]);
   const current = levels.find(l => l.id === selected) ?? levels[0];
   const currentExam = cambridgeExamFormats.find(exam => exam.id === examLevelId) ?? cambridgeExamFormats[0];
+  const practiceTests = cambridgePracticeBank.filter(test => test.levelId === examLevelId);
+  const activePracticeTest = practiceTests.find(test => test.id === practiceTestId) ?? practiceTests[0];
   const filteredLessons = useMemo(() => lessons.filter(l =>
     (filter === "Tất cả" || l.type === filter) &&
     (levelFilter === "Tất cả cấp độ" || l.level === levelFilter) &&
@@ -228,7 +250,7 @@ export default function Home() {
         </div>
         <div className="audio-lab" id="practice">
           <div className="audio-card">
-            <div className="card-top"><div><span className="pill yellow">★ {current.short} {current.name}</span><h2>{selected === "pre-a1" ? "At the Zoo" : current.name + " Practice"}</h2></div><span className="big-emoji">{current.icon}</span></div>
+            <div className="card-top"><div><span className="pill yellow">★ {current.short} {current.name}</span><h2>{selected === "pre-a1" ? "Tham quan sở thú" : current.name + " - luyện tập"}</h2></div><span className="big-emoji">{current.icon}</span></div>
             <Wave active={playing}/>
             <div className="player"><button onClick={()=>setPlaying(!playing)}>{playing ? "Ⅱ" : "▶"}</button><div><b>{playing ? "Đang phát bài nghe..." : "Nhấn để bắt đầu nghe"}</b><small>00:{playing ? "18" : "00"} / 01:05</small></div><span>0.75× &nbsp; <b>1×</b> &nbsp; 1.25×</span></div>
             <div className="sentence">🔊 <span>Could I have an orange juice, please?</span></div>
@@ -250,7 +272,7 @@ export default function Home() {
 
       <section className="method">
         <span className="kicker">PHƯƠNG PHÁP TRỌNG TÂM</span><h2>Nghe chủ động – Nói phản xạ</h2><p className="section-sub">Mỗi bài học đi theo vòng luyện tập ngắn, rõ ràng và có thể lặp lại.</p>
-        <div className="method-grid"><article><span>🎧</span><b>1. Nghe lấy ý</b><p>Nghe tình huống tự nhiên để xác định người nói, bối cảnh và ý chính.</p></article><article><span>🔍</span><b>2. Nghe chi tiết</b><p>Phát lại theo tốc độ phù hợp, hoàn thành câu hỏi và mở transcript.</p></article><article><span>🗣️</span><b>3. Nói có hướng dẫn</b><p>Shadowing từng câu, luyện trọng âm, nhịp điệu và âm cuối.</p></article><article><span>🏆</span><b>4. Nói tự do</b><p>Trả lời mở, đóng vai và nhận tiêu chí tự đánh giá theo cấp độ.</p></article></div>
+        <div className="method-grid"><article><span>🎧</span><b>1. Nghe lấy ý</b><p>Nghe tình huống tự nhiên để xác định người nói, bối cảnh và ý chính.</p></article><article><span>🔍</span><b>2. Nghe detail</b><p>Phát lại theo tốc độ phù hợp, hoàn thành câu hỏi và mở transcript.</p></article><article><span>🗣️</span><b>3. Nói có hướng dẫn</b><p>Shadowing từng câu, luyện trọng âm, nhịp điệu và âm cuối.</p></article><article><span>🏆</span><b>4. Nói tự do</b><p>Trả lời mở, đóng vai và nhận tiêu chí tự đánh giá theo cấp độ.</p></article></div>
       </section>
 
       <section className="exam-section" id="exam-formats">
@@ -258,12 +280,12 @@ export default function Home() {
           <div>
             <span className="kicker">DẠNG ĐỀ THI CAMBRIDGE</span>
             <h2>Luyện đúng cấu trúc từng chứng chỉ</h2>
-            <p className="catalog-summary">Bổ sung khung đề Listening, Reading, Writing, Speaking và gói luyện tập theo từng cấp độ.</p>
+            <p className="catalog-summary">Bổ sung khung đề Nghe, Đọc, Viết, Nói và gói luyện tập theo từng cấp độ.</p>
           </div>
           <div className="exam-note">Nội dung luyện tập tự biên soạn theo dạng bài Cambridge English, không phải đề thi chính thức.</div>
         </div>
         <div className="exam-tabs" role="tablist" aria-label="Chọn cấp độ đề thi Cambridge">
-          {cambridgeExamFormats.map(exam => <button key={exam.id} className={examLevelId===exam.id?"active":""} onClick={()=>setExamLevelId(exam.id)} type="button"><b>{exam.exam}</b><small>{exam.level}</small></button>)}
+          {cambridgeExamFormats.map(exam => <button key={exam.id} className={examLevelId===exam.id?"active":""} onClick={()=>{setExamLevelId(exam.id); setPracticeTestId(cambridgePracticeBank.find(test => test.levelId === exam.id)?.id ?? practiceTestId);}} type="button"><b>{exam.exam}</b><small>{exam.level}</small></button>)}
         </div>
         <div className="exam-overview">
           <div className="exam-intro">
@@ -290,6 +312,34 @@ export default function Home() {
             </article>)}
           </div>
         </div>
+        {activePracticeTest && <div className="test-bank">
+          <div className="test-bank-head">
+            <div>
+              <span className="kicker">NGÂN HÀNG 36 ĐỀ LUYỆN</span>
+              <h3>{activePracticeTest.title}</h3>
+              <p>{activePracticeTest.level} {activePracticeTest.exam} · Chủ đề: {activePracticeTest.theme}</p>
+            </div>
+            <select value={activePracticeTest.id} onChange={e=>setPracticeTestId(e.target.value)} aria-label="Chọn đề luyện tập">
+              {practiceTests.map(test => <option key={test.id} value={test.id}>{test.title} · {test.theme}</option>)}
+            </select>
+          </div>
+          <div className="test-paper-list">
+            {activePracticeTest.papers.map(paper => <article key={paper.paper} className="test-paper">
+              <header><b>{paper.paper}</b><span>{paper.time}</span></header>
+              <div className="test-items">
+                {paper.items.map(item => <section key={`${paper.paper}-${item.part}`}>
+                  <div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div>
+                  <p>{item.instruction}</p>
+                  <ul>
+                    <li><b>Câu mẫu:</b> {item.sampleQuestion}</li>
+                    <li><b>Đáp án/gợi ý:</b> {item.answerKey}</li>
+                    <li><b>Trọng tâm:</b> {item.skillFocus}</li>
+                  </ul>
+                </section>)}
+              </div>
+            </article>)}
+          </div>
+        </div>}
       </section>
 
       <section className="lesson-section" id="lessons">
