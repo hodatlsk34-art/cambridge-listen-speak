@@ -15,22 +15,44 @@ const fluencyStages = [
 type FluencyStageId = (typeof fluencyStages)[number]["id"];
 
 const roadmap = [
-  { id: "foundation", level: "A0 - Pre A1", title: "Nghe âm trước, nói theo ngay", goal: "Xây phản xạ âm thanh: nghe được từ khóa và nói câu rất ngắn.", output: "Tự chào hỏi, gọi tên đồ vật, trả lời câu hỏi đơn giản." },
-  { id: "daily", level: "A1", title: "Sinh hoạt hằng ngày", goal: "Nói được nhu cầu thật: ăn uống, lớp học, gia đình, thời gian, địa điểm.", output: "Tạo hội thoại 4-6 lượt trong tình huống quen thuộc." },
-  { id: "story", level: "A2", title: "Mô tả, kể chuyện, hỏi lại", goal: "Nói theo tranh, kể việc đã xảy ra, hỏi lại khi chưa rõ.", output: "Nói liên tục 45-60 giây về một chủ đề đời sống." },
-  { id: "conversation", level: "B1", title: "Hội thoại đời sống thật", goal: "Phản xạ trong trường học, du lịch, dịch vụ, sức khỏe an toàn, công nghệ.", output: "Duy trì hội thoại 2-3 phút, có lý do và ví dụ." },
-  { id: "discussion", level: "B2", title: "Nêu quan điểm và tương tác", goal: "Nghe ý kiến khác nhau, phản hồi, đồng ý, không đồng ý lịch sự.", output: "Thảo luận vấn đề quen thuộc với lập luận rõ." },
-  { id: "second-language", level: "C1 - C2", title: "Tiếng Anh như ngôn ngữ thứ hai", goal: "Dùng tiếng Anh để học, làm việc, trình bày, thương lượng và suy nghĩ.", output: "Nói tự nhiên, chính xác, linh hoạt theo người nghe và mục đích." },
+  { id: "beginner", level: "A0-Pre A1", title: "Beginner - Bắt đầu nghe và bắt chước", goal: "Nghe âm, bắt từ khóa, nói câu 3-5 từ thật rõ.", daily: "1 bài/ngày: nghe 3 lần, nói theo 5 câu, ghi âm 1 lần.", output: "Tự chào hỏi, gọi tên đồ vật, trả lời câu hỏi Yes/No và câu ngắn." },
+  { id: "elementary", level: "A1", title: "Elementary - Giao tiếp nhu cầu hằng ngày", goal: "Hỏi đáp đơn giản về bản thân, gia đình, thời gian, địa điểm, đồ ăn, lớp học.", daily: "1 bài/ngày: nghe hội thoại, đọc song ngữ, đổi 2 thông tin cá nhân.", output: "Tạo hội thoại 5 lượt trong tình huống quen thuộc." },
+  { id: "pre-intermediate", level: "A2", title: "Pre-Intermediate - Mô tả và kể chuyện ngắn", goal: "Mô tả tranh/tình huống, kể việc đã xảy ra, thêm lý do và thời gian.", daily: "1-2 bài/ngày: shadowing, nói lại, hỏi lại khi chưa rõ.", output: "Nói liên tục 45-60 giây về một chủ đề đời sống." },
+  { id: "intermediate", level: "B1", title: "Intermediate - Hội thoại đời sống thật", goal: "Duy trì hội thoại, hỏi tiếp, giải thích ý và xử lý tình huống.", daily: "2 bài/ngày: một bài phản xạ, một bài ứng dụng đời sống.", output: "Nói 2 phút có mở ý, lý do và ví dụ." },
+  { id: "upper-intermediate", level: "B2", title: "Upper-Intermediate - Thảo luận và quan điểm", goal: "So sánh lựa chọn, nêu quan điểm, phản hồi lịch sự và bảo vệ ý kiến.", daily: "2 bài/ngày: nghe ý kiến, luyện nói mở rộng, tự tổng kết.", output: "Thảo luận 2-3 phút về vấn đề quen thuộc." },
+  { id: "advanced", level: "C1", title: "Advanced - Trình bày linh hoạt", goal: "Trình bày, tóm tắt, phát triển ý, dùng tiếng Anh cho học tập và công việc.", daily: "2-3 bài/ngày: nói dài, ghi âm, tự sửa độ rõ và độ mạch lạc.", output: "Trình bày 3 phút có ví dụ, phản hồi và kết luận." },
+  { id: "proficient", level: "C2", title: "Proficient - Thông hiểu và thành thạo", goal: "Dùng tiếng Anh tự nhiên, chính xác, linh hoạt như ngôn ngữ thứ hai.", daily: "3 bài/ngày: phản xạ nhanh, thảo luận sâu, ứng dụng vào việc thật.", output: "Diễn đạt 3-4 phút tự nhiên, có sắc thái, phản hồi và tổng kết." },
+] as const;
+
+const studyCycle = [
+  "Nghe không nhìn chữ để bắt ý chính.",
+  "Mở song ngữ để hiểu nghĩa và cách dùng câu.",
+  "Shadowing từng câu, chú ý nhịp và âm cuối.",
+  "Đổi thông tin thành câu của mình.",
+  "Ghi âm, nghe lại, rồi trả lời câu hỏi.",
+] as const;
+
+const levelUpChecks = [
+  "Hoàn thành ít nhất 40 bài ở cấp hiện tại.",
+  "Nghe lại hội thoại và hiểu được ý chính không cần nhìn dịch.",
+  "Nói được bài phản xạ đúng độ dài yêu cầu của cấp.",
+  "Tự tạo được câu mới, không chỉ đọc lại câu mẫu.",
 ] as const;
 
 const levelBands = [
-  { stageId: "beginner", level: "A0-Pre A1", turns: 4, speak: "Nói 4-5 câu ngắn, rõ âm và đúng nhịp." },
-  { stageId: "elementary", level: "A1", turns: 5, speak: "Tạo hội thoại 5 lượt, có chào hỏi và trả lời ngắn." },
-  { stageId: "pre-intermediate", level: "A2", turns: 6, speak: "Đóng vai 6 lượt, thêm lý do hoặc thời gian." },
-  { stageId: "intermediate", level: "B1", turns: 7, speak: "Duy trì hội thoại 2 phút, hỏi lại và giải thích rõ." },
-  { stageId: "upper-intermediate", level: "B2", turns: 8, speak: "Thảo luận 2-3 phút, so sánh hai lựa chọn và nêu quan điểm." },
-  { stageId: "advanced", level: "C1", turns: 9, speak: "Trình bày linh hoạt 3 phút, có ví dụ, phản hồi và kết luận." },
-  { stageId: "proficient", level: "C2", turns: 10, speak: "Diễn đạt tự nhiên 3-4 phút, có sắc thái, phản hồi và tổng kết." },
+  { stageId: "beginner", level: "A0-Pre A1", turns: 4, speak: "Nói 4-5 câu ngắn, rõ âm và đúng nhịp.", function: "greeting, naming, choosing, answering yes/no", viFunction: "chào hỏi, gọi tên, lựa chọn, trả lời có/không" },
+  { stageId: "elementary", level: "A1", turns: 5, speak: "Tạo hội thoại 5 lượt, có chào hỏi và trả lời ngắn.", function: "meeting people, asking simple questions, checking understanding", viFunction: "làm quen, hỏi câu đơn giản, kiểm tra lại xem đã hiểu chưa" },
+  { stageId: "pre-intermediate", level: "A2", turns: 6, speak: "Đóng vai 6 lượt, thêm lý do hoặc thời gian.", function: "showing interest, making suggestions, talking about routines and jobs", viFunction: "thể hiện sự quan tâm, đưa ra gợi ý, nói về thói quen và công việc" },
+  { stageId: "intermediate", level: "B1", turns: 7, speak: "Duy trì hội thoại 2 phút, hỏi lại và giải thích rõ.", function: "describing experiences, explaining reasons, handling everyday problems", viFunction: "kể trải nghiệm, giải thích lý do, xử lý vấn đề đời sống" },
+  { stageId: "upper-intermediate", level: "B2", turns: 8, speak: "Thảo luận 2-3 phút, so sánh hai lựa chọn và nêu quan điểm.", function: "giving advice, comparing options, supporting an opinion", viFunction: "đưa lời khuyên, so sánh lựa chọn, bảo vệ quan điểm" },
+  { stageId: "advanced", level: "C1", turns: 9, speak: "Trình bày linh hoạt 3 phút, có ví dụ, phản hồi và kết luận.", function: "presenting ideas, responding flexibly, summarising and negotiating meaning", viFunction: "trình bày ý, phản hồi linh hoạt, tóm tắt và làm rõ nghĩa" },
+  { stageId: "proficient", level: "C2", turns: 10, speak: "Diễn đạt tự nhiên 3-4 phút, có sắc thái, phản hồi và tổng kết.", function: "expressing nuance, adapting tone, sustaining natural discussion", viFunction: "diễn đạt sắc thái, điều chỉnh giọng điệu, duy trì thảo luận tự nhiên" },
+] as const;
+
+const sourceGuides = [
+  "CEFR: dùng mô tả năng lực A1-C2 để tăng dần độ dài, độ tự nhiên và mức độc lập khi nói.",
+  "British Council LearnEnglish Speaking: dùng nhóm chức năng như meeting people, checking understanding, making suggestions, showing interest, talking about work và giving advice.",
+  "Cambridge English: dùng định hướng CEFR để giữ lộ trình từ basic user đến proficient user.",
 ] as const;
 
 const topicSeeds = [
@@ -119,11 +141,13 @@ const lessonVariants = [
 
 function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLabel: string, variant: (typeof lessonVariants)[number]) {
   const [titleEn, titleVi, phraseEn, phraseVi] = seed;
+  const band = levelBands[bandIndex];
   const lines = [
     [`Can we talk about ${phraseEn}?`, `Chúng ta có thể nói về ${phraseVi} không?`],
     [`Sure. ${titleEn} is part of everyday life.`, `Được. ${titleVi} là một phần của cuộc sống hằng ngày.`],
     [`What should I say first?`, `Trước tiên tôi nên nói gì?`],
     [`Start with one clear sentence and a real example.`, `Hãy bắt đầu bằng một câu rõ ràng và một ví dụ thật.`],
+    [`At this level, I practise ${band.function}.`, `Ở cấp này, tôi luyện ${band.viFunction}.`],
     [`This lesson helps me ${variant.focus}.`, `Bài này giúp tôi ${variant.viFocus}.`],
     [`For ${stageLabel.toLowerCase()}, this topic should sound natural and useful.`, `Ở cấp ${stageLabel.toLowerCase()}, chủ đề này cần tự nhiên và hữu ích.`],
     [`I can add a reason, such as time, place, or feeling.`, `Tôi có thể thêm lý do, chẳng hạn như thời gian, địa điểm hoặc cảm xúc.`],
@@ -146,8 +170,8 @@ const topics = levelBands.flatMap((band, bandIndex) =>
       stageId: band.stageId,
       variant: variant.label,
       lines: makeLines(seed, bandIndex, band.level, variant),
-      listenTask: `Nghe hội thoại về ${seed[3]} để xác định chủ đề, ví dụ và phần ${variant.viFocus}.`,
-      speakTask: `${band.speak} Chủ đề: ${seed[1]}. Bài ${variantIndex + 1}: ${variant.label}.`,
+      listenTask: `Nghe hội thoại về ${seed[3]} để xác định chủ đề, ví dụ, chức năng giao tiếp và phần ${variant.viFocus}.`,
+      speakTask: `${band.speak} Trọng tâm: ${band.viFunction}. Chủ đề: ${seed[1]}. Bài ${variantIndex + 1}: ${variant.label}.`,
     }))
   )
 );
@@ -266,7 +290,7 @@ export default function Home() {
           <div className="audio-lab compact-lab"><div className="audio-card"><div className="card-top"><div><span className="pill yellow">{selectedStage.label} · {selectedStage.vi} · {selectedStage.level}</span><h2>{selectedStage.promise}</h2></div><span className="big-emoji">{selectedStage.icon}</span></div><Wave active={playing}/><div className="player"><button onClick={() => filteredTopics[0] && playTopic(filteredTopics[0])}>{playing ? "Ⅱ" : "▶"}</button><div><b>Nghe mẫu hội thoại thật</b><small>Nghe tiếng Anh trước, mở dịch Việt sau, rồi nói lại.</small></div><span>listen · repeat · speak</span></div></div></div>
         </div>}
 
-        {activeView === "roadmap" && <div className="level-rail app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH TỔNG THỂ</span><h2>Từ người mới bắt đầu đến dùng tiếng Anh tự nhiên</h2></div><p>Mỗi chặng có đầu ra nghe - nói rõ ràng.</p></div><div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Đầu ra: {stage.output}</div></div></article>)}</div></div>}
+        {activeView === "roadmap" && <div className="level-rail app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH HỌC ĐƠN GIẢN - HIỆU QUẢ</span><h2>Đi từ Beginner đến thông hiểu - thành thạo</h2></div><p>Dữ liệu hiện dùng 60 chủ đề đời sống, 7 cấp năng lực và 3 biến thể luyện tập cho mỗi chủ đề.</p></div><div className="roadmap-stats"><span><b>1.260</b><small>bài nghe - nói</small></span><span><b>60</b><small>chủ đề đời sống</small></span><span><b>7</b><small>cấp năng lực</small></span><span><b>3</b><small>biến thể mỗi chủ đề</small></span></div><div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Học mỗi ngày: {stage.daily}</div><footer><span>Đầu ra</span><span>{stage.output}</span></footer></div></article>)}</div><div className="roadmap-support"><article><h3>Chu trình 1 bài học</h3><ol>{studyCycle.map((item) => <li key={item}>{item}</li>)}</ol></article><article><h3>Khi nào lên cấp?</h3><ol>{levelUpChecks.map((item) => <li key={item}>{item}</li>)}</ol></article><article className="source-guide"><h3>Nguồn chuẩn dùng để thiết kế lại</h3><ol>{sourceGuides.map((item) => <li key={item}>{item}</li>)}</ol></article></div></div>}
 
         {activeView === "programs" && <div className="tracks-section app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH THEO NĂNG LỰC</span><h2>Từ Beginner đến thông hiểu - thành thạo</h2></div><p>Chọn cấp độ hiện tại để lọc chủ đề, độ dài hội thoại và bài luyện nói phù hợp.</p></div><div className="track-grid">{fluencyStages.map((item) => <article key={item.id} className={stage === item.id ? "selected-card" : ""} onClick={() => setStage(item.id)}><span>{item.icon}</span><b>{item.label}</b><small>{`${item.vi} · ${item.level}`}</small><p>{item.promise}</p><ul>{item.goals.map((goal) => <li key={goal}>{goal}</li>)}</ul><button className="button secondary" onClick={(event) => { event.stopPropagation(); setStage(item.id); openView("topics"); }}>Xem chủ đề</button></article>)}</div></div>}
 
