@@ -139,215 +139,137 @@ const lessonVariants = [
   },
 ] as const;
 
-function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLabel: string, variant: (typeof lessonVariants)[number]) {
+function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLabel: string, variant: (typeof lessonVariants)[number], seedIndex: number) {
   const [titleEn, titleVi, phraseEn, phraseVi] = seed;
   const band = levelBands[bandIndex];
-  const stageScripts: Record<FluencyStageId, Record<(typeof lessonVariants)[number]["id"], [string, string][]>> = {
-    beginner: {
-      core: [
-        [`A: Hello. My name is Anna.`, `A: Xin chào. Tên tôi là Anna.`],
-        [`B: Hello, Anna. What is this topic?`, `B: Xin chào Anna. Đây là chủ đề gì?`],
-        [`A: It is ${phraseEn}.`, `A: Đó là ${phraseVi}.`],
-        [`B: Good. Say it again, please.`, `B: Tốt. Hãy nói lại lần nữa.`],
-      ],
-      reflex: [
-        [`A: Hi. Is it ${phraseEn} or homework?`, `A: Chào. Đây là ${phraseVi} hay bài tập về nhà?`],
-        [`B: It is ${phraseEn}.`, `B: Đây là ${phraseVi}.`],
-        [`A: Do you like it?`, `A: Bạn có thích việc đó không?`],
-        [`B: Yes, I do.`, `B: Có, tôi thích.`],
-      ],
-      "real-life": [
-        [`A: Hello. I need ${phraseEn}.`, `A: Xin chào. Tôi cần ${phraseVi}.`],
-        [`B: Okay. This one or that one?`, `B: Được. Cái này hay cái kia?`],
-        [`A: This one, please.`, `A: Cái này, làm ơn.`],
-        [`B: Sure. Here you are.`, `B: Chắc chắn rồi. Của bạn đây.`],
-      ],
-    },
-    elementary: {
-      core: [
-        [`A: Hi, I'm Anna. What's your name?`, `A: Chào, tôi là Anna. Bạn tên là gì?`],
-        [`B: I'm Ben. Nice to meet you.`, `B: Tôi là Ben. Rất vui được gặp bạn.`],
-        [`A: Nice to meet you too. Do you know about ${phraseEn}?`, `A: Tôi cũng rất vui được gặp bạn. Bạn có biết về ${phraseVi} không?`],
-        [`B: A little. Can you say it again?`, `B: Một chút. Bạn có thể nói lại không?`],
-        [`A: Sure. I said ${phraseEn}.`, `A: Được. Tôi đã nói ${phraseVi}.`],
-      ],
-      reflex: [
-        [`A: Can I ask you a question about ${phraseEn}?`, `A: Tôi có thể hỏi bạn một câu về ${phraseVi} không?`],
-        [`B: Yes, go ahead.`, `B: Được, bạn hỏi đi.`],
-        [`A: When do you usually do it?`, `A: Bạn thường làm việc đó khi nào?`],
-        [`B: Usually in the morning. Did you understand?`, `B: Thường là vào buổi sáng. Bạn đã hiểu chưa?`],
-        [`A: Yes. You usually do it in the morning.`, `A: Có. Bạn thường làm việc đó vào buổi sáng.`],
-      ],
-      "real-life": [
-        [`A: I'm new here. Can you help me with ${phraseEn}?`, `A: Tôi mới ở đây. Bạn có thể giúp tôi về ${phraseVi} không?`],
-        [`B: Of course. What do you need?`, `B: Tất nhiên. Bạn cần gì?`],
-        [`A: I need one simple example.`, `A: Tôi cần một ví dụ đơn giản.`],
-        [`B: For example, you can use it after class. Is that clear?`, `B: Ví dụ, bạn có thể dùng việc đó sau giờ học. Như vậy rõ chưa?`],
-        [`A: Yes, that's clear. Thank you.`, `A: Có, rõ rồi. Cảm ơn bạn.`],
-      ],
-    },
-    "pre-intermediate": {
-      core: [
-        [`A: How is your ${phraseEn} going this week?`, `A: Tuần này việc ${phraseVi} của bạn thế nào?`],
-        [`B: It's going well, but I want to improve it.`, `B: Việc đó ổn, nhưng tôi muốn cải thiện.`],
-        [`A: That's interesting. What do you usually do?`, `A: Thú vị đấy. Bạn thường làm gì?`],
-        [`B: I usually practise after school or in the evening.`, `B: Tôi thường luyện sau giờ học hoặc vào buổi tối.`],
-        [`A: Maybe you can make a small plan.`, `A: Có lẽ bạn có thể lập một kế hoạch nhỏ.`],
-        [`B: Good idea. I can try it today.`, `B: Ý hay đấy. Tôi có thể thử hôm nay.`],
-      ],
-      reflex: [
-        [`A: You mentioned ${phraseEn}. That sounds useful.`, `A: Bạn nhắc đến ${phraseVi}. Nghe có vẻ hữu ích.`],
-        [`B: Yes, it helps me in my routine.`, `B: Đúng, nó giúp tôi trong thói quen hằng ngày.`],
-        [`A: What do you do first?`, `A: Bạn làm gì trước tiên?`],
-        [`B: First, I choose a simple task.`, `B: Trước tiên, tôi chọn một việc đơn giản.`],
-        [`A: Why don't we practise together for ten minutes?`, `A: Sao chúng ta không luyện cùng nhau trong mười phút?`],
-        [`B: Sure. That would make it easier.`, `B: Được. Như vậy sẽ dễ hơn.`],
-      ],
-      "real-life": [
-        [`A: I have a busy day, but I still need time for ${phraseEn}.`, `A: Tôi có một ngày bận rộn, nhưng vẫn cần thời gian cho ${phraseVi}.`],
-        [`B: What is your usual routine?`, `B: Thói quen thường ngày của bạn là gì?`],
-        [`A: I finish school, do homework, and then practise a little.`, `A: Tôi học xong, làm bài tập rồi luyện một chút.`],
-        [`B: That sounds reasonable. Do you want a suggestion?`, `B: Nghe hợp lý đấy. Bạn muốn một gợi ý không?`],
-        [`A: Yes, please. I want to make it simple.`, `A: Có. Tôi muốn làm việc đó đơn giản.`],
-        [`B: Try one short dialogue every day.`, `B: Hãy thử một đoạn hội thoại ngắn mỗi ngày.`],
-      ],
-    },
-    intermediate: {
-      core: [
-        [`A: Yesterday I had an experience with ${phraseEn}.`, `A: Hôm qua tôi có một trải nghiệm với ${phraseVi}.`],
-        [`B: What happened?`, `B: Chuyện gì đã xảy ra?`],
-        [`A: I needed to explain what I wanted, but I paused a lot.`, `A: Tôi cần giải thích điều mình muốn, nhưng tôi ngập ngừng khá nhiều.`],
-        [`B: Why was it difficult?`, `B: Vì sao việc đó khó?`],
-        [`A: Because I knew the idea, but I didn't know the best words.`, `A: Vì tôi hiểu ý, nhưng không biết những từ phù hợp nhất.`],
-        [`B: What did you do then?`, `B: Sau đó bạn đã làm gì?`],
-        [`A: I used simpler words and checked if the listener understood.`, `A: Tôi dùng từ đơn giản hơn và kiểm tra xem người nghe đã hiểu chưa.`],
-      ],
-      reflex: [
-        [`A: I had a small problem with ${phraseEn}.`, `A: Tôi gặp một vấn đề nhỏ với ${phraseVi}.`],
-        [`B: Tell me what happened first.`, `B: Trước tiên hãy kể chuyện gì đã xảy ra.`],
-        [`A: I was not sure what to say, so I asked for a moment.`, `A: Tôi không chắc nên nói gì, nên đã xin một chút thời gian.`],
-        [`B: That was a good strategy. Why did it help?`, `B: Đó là một cách tốt. Vì sao nó hữu ích?`],
-        [`A: It helped because I could organise my answer.`, `A: Nó hữu ích vì tôi có thể sắp xếp câu trả lời.`],
-        [`B: What would you say next time?`, `B: Lần sau bạn sẽ nói gì?`],
-        [`A: I would explain the situation, give a reason, and ask one follow-up question.`, `A: Tôi sẽ giải thích tình huống, đưa lý do và hỏi thêm một câu.`],
-      ],
-      "real-life": [
-        [`A: We need to solve a situation about ${phraseEn}.`, `A: Chúng ta cần xử lý một tình huống về ${phraseVi}.`],
-        [`B: What options do we have?`, `B: Chúng ta có những lựa chọn nào?`],
-        [`A: We can do it now, ask for help, or make a short plan.`, `A: Chúng ta có thể làm ngay, nhờ giúp đỡ hoặc lập một kế hoạch ngắn.`],
-        [`B: Which option is best?`, `B: Lựa chọn nào tốt nhất?`],
-        [`A: I think making a short plan is best because it reduces mistakes.`, `A: Tôi nghĩ lập kế hoạch ngắn là tốt nhất vì nó giảm lỗi.`],
-        [`B: That makes sense. What is the first step?`, `B: Hợp lý đấy. Bước đầu tiên là gì?`],
-        [`A: The first step is to say the goal clearly.`, `A: Bước đầu tiên là nói rõ mục tiêu.`],
-      ],
-    },
-    "upper-intermediate": {
-      core: [
-        [`A: I need advice about ${phraseEn}.`, `A: Tôi cần lời khuyên về ${phraseVi}.`],
-        [`B: What are your two options?`, `B: Hai lựa chọn của bạn là gì?`],
-        [`A: I can practise alone, or I can practise with a partner.`, `A: Tôi có thể luyện một mình hoặc luyện với bạn.`],
-        [`B: Practising with a partner may be better because you get real responses.`, `B: Luyện với bạn có thể tốt hơn vì bạn nhận được phản hồi thật.`],
-        [`A: I agree, but practising alone is easier to schedule.`, `A: Tôi đồng ý, nhưng luyện một mình dễ sắp xếp thời gian hơn.`],
-        [`B: True. Which choice supports your main goal?`, `B: Đúng. Lựa chọn nào hỗ trợ mục tiêu chính của bạn?`],
-        [`A: A partner supports speaking confidence, so I would choose that twice a week.`, `A: Luyện với bạn giúp tăng tự tin khi nói, nên tôi sẽ chọn cách đó hai lần một tuần.`],
-        [`B: That's a balanced decision.`, `B: Đó là một quyết định cân bằng.`],
-      ],
-      reflex: [
-        [`A: If someone asks me about ${phraseEn}, what advice can I give?`, `A: Nếu ai đó hỏi tôi về ${phraseVi}, tôi có thể đưa lời khuyên gì?`],
-        [`B: Start with the listener's situation before giving advice.`, `B: Hãy bắt đầu từ tình huống của người nghe trước khi khuyên.`],
-        [`A: So I can say, "If your goal is clear, choose the simpler option."`, `A: Vậy tôi có thể nói: "Nếu mục tiêu của bạn rõ, hãy chọn phương án đơn giản hơn."`],
-        [`B: Good. Now compare the two options.`, `B: Tốt. Bây giờ hãy so sánh hai lựa chọn.`],
-        [`A: The first option is faster, but the second option is more reliable.`, `A: Phương án đầu nhanh hơn, nhưng phương án thứ hai đáng tin cậy hơn.`],
-        [`B: Which one do you support?`, `B: Bạn ủng hộ phương án nào?`],
-        [`A: I support the second option because it works better in the long term.`, `A: Tôi ủng hộ phương án thứ hai vì nó hiệu quả hơn về lâu dài.`],
-        [`B: Strong answer. Add one example next time.`, `B: Câu trả lời tốt. Lần sau hãy thêm một ví dụ.`],
-      ],
-      "real-life": [
-        [`A: We must choose the best way to handle ${phraseEn}.`, `A: Chúng ta phải chọn cách tốt nhất để xử lý ${phraseVi}.`],
-        [`B: Let's compare speed, effort, and result.`, `B: Hãy so sánh tốc độ, công sức và kết quả.`],
-        [`A: The quick way saves time, but it may miss important details.`, `A: Cách nhanh tiết kiệm thời gian, nhưng có thể bỏ sót chi tiết quan trọng.`],
-        [`B: The careful way takes longer, but it gives a better result.`, `B: Cách cẩn thận mất nhiều thời gian hơn, nhưng cho kết quả tốt hơn.`],
-        [`A: My view is that quality matters more here.`, `A: Quan điểm của tôi là chất lượng quan trọng hơn trong tình huống này.`],
-        [`B: How would you defend that view?`, `B: Bạn sẽ bảo vệ quan điểm đó như thế nào?`],
-        [`A: If we explain clearly now, we avoid confusion later.`, `A: Nếu bây giờ chúng ta giải thích rõ, sau này sẽ tránh nhầm lẫn.`],
-        [`B: I can accept that argument.`, `B: Tôi có thể chấp nhận lập luận đó.`],
-      ],
-    },
-    advanced: {
-      core: [
-        [`A: I'd like to present an idea about ${phraseEn}.`, `A: Tôi muốn trình bày một ý về ${phraseVi}.`],
-        [`B: Go ahead. Start with the main point.`, `B: Bạn nói đi. Hãy bắt đầu với ý chính.`],
-        [`A: The main point is that small daily practice creates real progress.`, `A: Ý chính là luyện tập nhỏ mỗi ngày tạo ra tiến bộ thật.`],
-        [`B: Can you support that with an example?`, `B: Bạn có thể củng cố ý đó bằng một ví dụ không?`],
-        [`A: For example, a short dialogue can build vocabulary, pronunciation, and confidence.`, `A: Ví dụ, một đoạn hội thoại ngắn có thể xây dựng từ vựng, phát âm và sự tự tin.`],
-        [`B: That's clear. How would you respond to a different view?`, `B: Rõ rồi. Bạn sẽ phản hồi một quan điểm khác như thế nào?`],
-        [`A: I would acknowledge it, then explain why my approach still works.`, `A: Tôi sẽ ghi nhận quan điểm đó, rồi giải thích vì sao cách của tôi vẫn hiệu quả.`],
-        [`B: Please summarise your point in one sentence.`, `B: Hãy tóm tắt ý của bạn trong một câu.`],
-        [`A: Regular, focused speaking practice makes ${phraseEn} easier to use in real life.`, `A: Luyện nói đều đặn và có trọng tâm giúp dùng ${phraseVi} dễ hơn trong đời sống thật.`],
-      ],
-      reflex: [
-        [`A: I need to respond flexibly in a discussion about ${phraseEn}.`, `A: Tôi cần phản hồi linh hoạt trong một cuộc thảo luận về ${phraseVi}.`],
-        [`B: Then listen for the speaker's purpose first.`, `B: Vậy trước hết hãy nghe mục đích của người nói.`],
-        [`A: If they want advice, I give a practical option.`, `A: Nếu họ muốn lời khuyên, tôi đưa ra một lựa chọn thực tế.`],
-        [`B: And if they disagree?`, `B: Còn nếu họ không đồng ý thì sao?`],
-        [`A: I can say, "I see your point, but I would add one thing."`, `A: Tôi có thể nói: "Tôi hiểu ý của bạn, nhưng tôi muốn bổ sung một điều."`],
-        [`B: That keeps the tone respectful.`, `B: Cách đó giữ giọng điệu tôn trọng.`],
-        [`A: Then I connect my answer to a real example.`, `A: Sau đó tôi liên hệ câu trả lời với một ví dụ thật.`],
-        [`B: Finish by summarising both sides.`, `B: Hãy kết thúc bằng cách tóm tắt cả hai phía.`],
-        [`A: So the answer is balanced, clear, and easy to follow.`, `A: Vì vậy câu trả lời cân bằng, rõ ràng và dễ theo dõi.`],
-      ],
-      "real-life": [
-        [`A: In a real conversation, ${phraseEn} may require a clear structure.`, `A: Trong hội thoại thật, ${phraseVi} có thể cần một cấu trúc rõ ràng.`],
-        [`B: What structure would you use?`, `B: Bạn sẽ dùng cấu trúc nào?`],
-        [`A: I would state the issue, give context, explain my view, and summarise.`, `A: Tôi sẽ nêu vấn đề, đưa ngữ cảnh, giải thích quan điểm và tóm tắt.`],
-        [`B: Can you make it sound natural?`, `B: Bạn có thể làm cho câu nói tự nhiên không?`],
-        [`A: Yes. I would use linking phrases instead of separate sentences only.`, `A: Có. Tôi sẽ dùng cụm nối ý thay vì chỉ nói các câu rời rạc.`],
-        [`B: Give one linking phrase.`, `B: Hãy đưa một cụm nối ý.`],
-        [`A: "At the same time" helps me add a balanced point.`, `A: "At the same time" giúp tôi thêm một ý cân bằng.`],
-        [`B: Good. Now close the conversation.`, `B: Tốt. Bây giờ hãy kết thúc cuộc hội thoại.`],
-        [`A: Overall, clear structure makes my English easier to understand.`, `A: Nhìn chung, cấu trúc rõ giúp tiếng Anh của tôi dễ hiểu hơn.`],
-      ],
-    },
-    proficient: {
-      core: [
-        [`A: I'd like to discuss ${phraseEn}, but with a careful tone.`, `A: Tôi muốn thảo luận về ${phraseVi}, nhưng với giọng điệu cẩn trọng.`],
-        [`B: What tone fits the situation?`, `B: Giọng điệu nào phù hợp với tình huống?`],
-        [`A: A friendly tone works for classmates, while a more formal tone works for teachers or colleagues.`, `A: Giọng thân thiện phù hợp với bạn học, còn giọng trang trọng hơn phù hợp với giáo viên hoặc đồng nghiệp.`],
-        [`B: Can you express the same idea more softly?`, `B: Bạn có thể diễn đạt cùng ý đó nhẹ nhàng hơn không?`],
-        [`A: I might say, "It could be helpful to consider another option."`, `A: Tôi có thể nói: "Có thể sẽ hữu ích nếu cân nhắc một lựa chọn khác."`],
-        [`B: That sounds natural and polite.`, `B: Câu đó nghe tự nhiên và lịch sự.`],
-        [`A: The nuance changes the listener's reaction.`, `A: Sắc thái làm thay đổi phản ứng của người nghe.`],
-        [`B: Exactly. Keep the meaning clear, but adjust the style.`, `B: Chính xác. Hãy giữ nghĩa rõ, nhưng điều chỉnh cách diễn đạt.`],
-        [`A: So fluency is not only speed; it is control.`, `A: Vậy sự thành thạo không chỉ là tốc độ; đó còn là khả năng kiểm soát ngôn ngữ.`],
-        [`B: That's a mature summary.`, `B: Đó là một phần tóm tắt chín chắn.`],
-      ],
-      reflex: [
-        [`A: In a natural discussion about ${phraseEn}, I need to adapt quickly.`, `A: Trong một cuộc thảo luận tự nhiên về ${phraseVi}, tôi cần điều chỉnh nhanh.`],
-        [`B: What might change during the conversation?`, `B: Điều gì có thể thay đổi trong cuộc hội thoại?`],
-        [`A: The listener's mood, the purpose, or the level of detail they need.`, `A: Tâm trạng của người nghe, mục đích nói chuyện hoặc mức độ chi tiết họ cần.`],
-        [`B: How would you respond if they seem unsure?`, `B: Bạn sẽ phản hồi thế nào nếu họ có vẻ chưa chắc chắn?`],
-        [`A: I would slow down, rephrase the key point, and check understanding.`, `A: Tôi sẽ nói chậm lại, diễn đạt lại ý chính và kiểm tra xem họ hiểu chưa.`],
-        [`B: And if they want a deeper answer?`, `B: Còn nếu họ muốn câu trả lời sâu hơn?`],
-        [`A: I would add context, a contrast, and a short example.`, `A: Tôi sẽ thêm ngữ cảnh, một điểm đối chiếu và một ví dụ ngắn.`],
-        [`B: That shows flexible control.`, `B: Điều đó cho thấy khả năng kiểm soát linh hoạt.`],
-        [`A: The goal is to sound clear, natural, and appropriate.`, `A: Mục tiêu là nói rõ ràng, tự nhiên và phù hợp.`],
-        [`B: Yes. That is second-language confidence.`, `B: Đúng. Đó là sự tự tin khi dùng tiếng Anh như ngôn ngữ thứ hai.`],
-      ],
-      "real-life": [
-        [`A: Let's have a natural discussion about ${phraseEn}.`, `A: Hãy thảo luận tự nhiên về ${phraseVi}.`],
-        [`B: Sure. What angle do you want to take?`, `B: Được. Bạn muốn tiếp cận theo góc độ nào?`],
-        [`A: I want to focus on how it affects daily choices and communication.`, `A: Tôi muốn tập trung vào việc nó ảnh hưởng đến lựa chọn hằng ngày và giao tiếp như thế nào.`],
-        [`B: That's broad. Can you make it more specific?`, `B: Chủ đề đó khá rộng. Bạn có thể nói cụ thể hơn không?`],
-        [`A: Specifically, it helps people explain needs, preferences, and small problems more smoothly.`, `A: Cụ thể, nó giúp mọi người giải thích nhu cầu, sở thích và vấn đề nhỏ trôi chảy hơn.`],
-        [`B: I like that. How would you soften a strong opinion?`, `B: Tôi thích ý đó. Bạn sẽ làm mềm một quan điểm mạnh như thế nào?`],
-        [`A: I would say, "From my perspective, this seems more practical, although other views are possible."`, `A: Tôi sẽ nói: "Theo góc nhìn của tôi, điều này có vẻ thực tế hơn, dù vẫn có thể có quan điểm khác."`],
-        [`B: That sounds balanced.`, `B: Cách nói đó nghe cân bằng.`],
-        [`A: In short, good speaking means choosing the right meaning and the right tone.`, `A: Tóm lại, nói tốt nghĩa là chọn đúng ý và đúng giọng điệu.`],
-        [`B: Exactly. That is natural communication.`, `B: Chính xác. Đó là giao tiếp tự nhiên.`],
-      ],
-    },
+  const places = [
+    ["at the kitchen table", "ở bàn ăn trong bếp"],
+    ["before class starts", "trước khi lớp học bắt đầu"],
+    ["near the school gate", "gần cổng trường"],
+    ["in a small group", "trong một nhóm nhỏ"],
+    ["on a video call", "trong một cuộc gọi video"],
+    ["at the front desk", "ở quầy hỗ trợ"],
+    ["on the bus", "trên xe buýt"],
+    ["after a club meeting", "sau buổi sinh hoạt câu lạc bộ"],
+  ] as const;
+  const goals = [
+    ["choose the next step", "chọn bước tiếp theo"],
+    ["make the plan clearer", "làm kế hoạch rõ hơn"],
+    ["ask for the right help", "nhờ đúng sự giúp đỡ"],
+    ["avoid a small misunderstanding", "tránh một hiểu nhầm nhỏ"],
+    ["finish the task on time", "hoàn thành việc đúng giờ"],
+    ["explain the idea politely", "giải thích ý một cách lịch sự"],
+  ] as const;
+  const options = [
+    ["do it now", "làm ngay"],
+    ["wait ten minutes", "đợi mười phút"],
+    ["ask a classmate", "hỏi một bạn cùng lớp"],
+    ["write a short note", "viết một ghi chú ngắn"],
+    ["check the instructions", "kiểm tra hướng dẫn"],
+    ["make a simple list", "lập một danh sách đơn giản"],
+  ] as const;
+  const details = [
+    ["because we have five minutes", "vì chúng ta có năm phút"],
+    ["because the instructions are not clear yet", "vì hướng dẫn vẫn chưa rõ"],
+    ["because everyone needs the same information", "vì mọi người cần cùng một thông tin"],
+    ["because it will save time later", "vì việc đó sẽ tiết kiệm thời gian sau này"],
+    ["because the first plan is too rushed", "vì kế hoạch đầu hơi vội"],
+    ["because the listener may need an example", "vì người nghe có thể cần một ví dụ"],
+  ] as const;
+  const variantOffset = variant.id === "core" ? 0 : variant.id === "reflex" ? 2 : 4;
+  const place = places[seedIndex % places.length];
+  const goal = goals[(seedIndex + bandIndex) % goals.length];
+  const firstOption = options[(seedIndex + 1 + variantOffset) % options.length];
+  const secondOption = options[(seedIndex + 3 + variantOffset) % options.length];
+  const reason = details[(seedIndex + bandIndex + variantOffset) % details.length];
+  const mode = variant.id === "core"
+    ? {
+      beginner: ["Say the topic one more time.", "Hãy nói lại chủ đề một lần nữa."],
+      check: ["Let's name the situation first.", "Trước tiên hãy gọi tên tình huống."],
+      task: ["focus on the basic situation", "tập trung vào tình huống cơ bản"],
+    }
+    : variant.id === "reflex"
+      ? {
+        beginner: ["Answer quickly: yes or no?", "Hãy trả lời nhanh: có hay không?"],
+        check: ["Now ask one short follow-up question.", "Bây giờ hãy hỏi thêm một câu ngắn."],
+        task: ["answer, ask again, and change one detail", "trả lời, hỏi lại và đổi một chi tiết"],
+      }
+      : {
+        beginner: ["Choose one and use it now.", "Hãy chọn một phương án và dùng ngay."],
+        check: ["Let's use this in a real situation.", "Hãy dùng việc này trong một tình huống thật."],
+        task: ["connect the topic to a real plan", "liên hệ chủ đề với một kế hoạch thật"],
+      };
+  const sharedOpening: [string, string] = variant.id === "core"
+    ? [`A: Let's talk about ${phraseEn} ${place[0]}.`, `A: Hãy nói về ${phraseVi} ${place[1]}.`]
+    : variant.id === "reflex"
+      ? [`A: You said "${phraseEn}". What should I say next?`, `A: Bạn vừa nói "${phraseVi}". Tiếp theo tôi nên nói gì?`]
+      : [`A: We have a real situation about ${phraseEn} ${place[0]}.`, `A: Chúng ta có một tình huống thật về ${phraseVi} ${place[1]}.`];
+  const stageScripts: Record<FluencyStageId, [string, string][]> = {
+    beginner: [
+      [`A: Hello, Ben.`, `A: Xin chào Ben.`],
+      [`B: Hello, Anna. What is it?`, `B: Xin chào Anna. Đó là gì?`],
+      [`A: It is ${phraseEn}.`, `A: Đó là ${phraseVi}.`],
+      [`B: Good. ${mode.beginner[0]}`, `B: Tốt. ${mode.beginner[1]}`],
+    ],
+    elementary: [
+      [`A: Hi, I'm Anna. I'm talking about ${phraseEn}.`, `A: Chào, tôi là Anna. Tôi đang nói về ${phraseVi}.`],
+      [`B: Nice to meet you, Anna. Where are you now?`, `B: Rất vui được gặp bạn, Anna. Bây giờ bạn đang ở đâu?`],
+      [`A: I am ${place[0]}. I need to ${goal[0]}.`, `A: Tôi đang ${place[1]}. Tôi cần ${goal[1]}.`],
+      [`B: Do you mean ${firstOption[0]}? ${mode.check[0]}`, `B: Ý bạn là ${firstOption[1]} phải không? ${mode.check[1]}`],
+      [`A: Yes, that's right. Thanks for checking.`, `A: Đúng rồi. Cảm ơn bạn đã kiểm tra lại.`],
+    ],
+    "pre-intermediate": [
+      [sharedOpening[0], sharedOpening[1]],
+      [`B: That sounds useful. What do you usually do first?`, `B: Nghe có vẻ hữu ích. Bạn thường làm gì trước tiên?`],
+      [`A: I usually ${firstOption[0]} so I can ${goal[0]} and ${mode.task[0]}.`, `A: Tôi thường ${firstOption[1]} để có thể ${goal[1]} và ${mode.task[1]}.`],
+      [`B: Why don't we ${secondOption[0]} as well?`, `B: Sao chúng ta không ${secondOption[1]} nữa?`],
+      [`A: Good suggestion. It helps ${reason[0]}.`, `A: Gợi ý hay. Việc đó giúp ${reason[1]}.`],
+      [`B: Great. Let's try that routine today.`, `B: Tuyệt. Hôm nay hãy thử thói quen đó.`],
+    ],
+    intermediate: [
+      [`A: Yesterday, ${titleEn.toLowerCase()} became a real problem ${place[0]}.`, `A: Hôm qua, ${titleVi.toLowerCase()} trở thành một vấn đề thật ${place[1]}.`],
+      [`B: What happened exactly?`, `B: Chính xác thì chuyện gì đã xảy ra?`],
+      [`A: I wanted to ${goal[0]}, but I did not explain the situation clearly.`, `A: Tôi muốn ${goal[1]}, nhưng tôi chưa giải thích tình huống rõ ràng.`],
+      [`B: Why was it confusing?`, `B: Vì sao việc đó gây khó hiểu?`],
+      [`A: It was confusing ${reason[0]}.`, `A: Việc đó gây khó hiểu ${reason[1]}.`],
+      [`B: How did you handle it?`, `B: Bạn đã xử lý như thế nào?`],
+      [`A: I chose to ${secondOption[0]}, then I tried to ${mode.task[0]}.`, `A: Tôi chọn ${secondOption[1]}, rồi cố gắng ${mode.task[1]}.`],
+    ],
+    "upper-intermediate": [
+      [`A: I need advice about ${phraseEn} ${place[0]}.`, `A: Tôi cần lời khuyên về ${phraseVi} ${place[1]}.`],
+      [`B: What are the two realistic choices?`, `B: Hai lựa chọn thực tế là gì?`],
+      [`A: We can ${firstOption[0]}, or we can ${secondOption[0]}.`, `A: Chúng ta có thể ${firstOption[1]}, hoặc có thể ${secondOption[1]}.`],
+      [`B: The first choice is faster, but the second choice may be clearer.`, `B: Lựa chọn đầu nhanh hơn, nhưng lựa chọn thứ hai có thể rõ hơn.`],
+      [`A: I agree. For this situation, clarity matters ${reason[0]}.`, `A: Tôi đồng ý. Trong tình huống này, sự rõ ràng quan trọng ${reason[1]}.`],
+      [`B: So which choice would you defend?`, `B: Vậy bạn sẽ bảo vệ lựa chọn nào?`],
+      [`A: I would defend "${secondOption[0]}" because it supports the goal and helps me ${mode.task[0]}.`, `A: Tôi sẽ bảo vệ lựa chọn "${secondOption[1]}" vì nó hỗ trợ mục tiêu và giúp tôi ${mode.task[1]}.`],
+      [`B: That is a clear and practical argument.`, `B: Đó là một lập luận rõ ràng và thực tế.`],
+    ],
+    advanced: [
+      [`A: I'd like to present a short view on ${phraseEn}.`, `A: Tôi muốn trình bày một quan điểm ngắn về ${phraseVi}.`],
+      [`B: Start with the situation, then give your main idea.`, `B: Hãy bắt đầu bằng tình huống, rồi đưa ra ý chính.`],
+      [`A: The situation is ${place[0]}, and the main goal is to ${goal[0]}.`, `A: Tình huống là ${place[1]}, và mục tiêu chính là ${goal[1]}.`],
+      [`B: What makes this topic worth discussing?`, `B: Điều gì làm chủ đề này đáng thảo luận?`],
+      [`A: It matters ${reason[0]}, especially when people need clear information.`, `A: Nó quan trọng ${reason[1]}, đặc biệt khi mọi người cần thông tin rõ ràng.`],
+      [`B: How would you respond to someone who prefers to ${firstOption[0]}?`, `B: Bạn sẽ phản hồi thế nào với người thích ${firstOption[1]}?`],
+      [`A: I would say that choice can work, but ${secondOption[0]} may create a better result.`, `A: Tôi sẽ nói lựa chọn đó có thể hiệu quả, nhưng ${secondOption[1]} có thể tạo kết quả tốt hơn.`],
+      [`B: Please summarise your view.`, `B: Hãy tóm tắt quan điểm của bạn.`],
+      [`A: In short, ${titleEn.toLowerCase()} works best when I ${mode.task[0]} with a clear next step.`, `A: Tóm lại, ${titleVi.toLowerCase()} hiệu quả nhất khi tôi ${mode.task[1]} với bước tiếp theo rõ ràng.`],
+    ],
+    proficient: [
+      [`A: Let's discuss ${phraseEn} with a tone that fits the situation.`, `A: Hãy thảo luận về ${phraseVi} với giọng điệu phù hợp tình huống.`],
+      [`B: What kind of tone would you choose ${place[0]}?`, `B: Bạn sẽ chọn giọng điệu nào ${place[1]}?`],
+      [`A: I would sound calm and collaborative because the goal is to ${goal[0]} and ${mode.task[0]}.`, `A: Tôi sẽ nói bình tĩnh và hợp tác vì mục tiêu là ${goal[1]} và ${mode.task[1]}.`],
+      [`B: Can you make the point more diplomatic?`, `B: Bạn có thể diễn đạt ý đó khéo léo hơn không?`],
+      [`A: I might say, "Perhaps we could ${secondOption[0]} before we decide."`, `A: Tôi có thể nói: "Có lẽ chúng ta có thể ${secondOption[1]} trước khi quyết định."`],
+      [`B: That sounds natural. What nuance does it add?`, `B: Câu đó nghe tự nhiên. Nó thêm sắc thái gì?`],
+      [`A: It sounds less direct, but it still guides the listener toward a useful next step.`, `A: Nó nghe bớt trực diện hơn, nhưng vẫn hướng người nghe tới bước tiếp theo hữu ích.`],
+      [`B: How would you respond if they choose to ${firstOption[0]} instead?`, `B: Bạn sẽ phản hồi thế nào nếu họ chọn ${firstOption[1]} thay vào đó?`],
+      [`A: I would acknowledge their choice, then explain that my suggestion helps ${reason[0]}.`, `A: Tôi sẽ ghi nhận lựa chọn của họ, rồi giải thích rằng gợi ý của tôi giúp ${reason[1]}.`],
+      [`B: Good. That keeps the discussion natural, respectful, and clear.`, `B: Tốt. Cách đó giữ cuộc thảo luận tự nhiên, tôn trọng và rõ ràng.`],
+    ],
   };
-  const lines = stageScripts[band.stageId][variant.id];
+  const lines = stageScripts[band.stageId];
   return lines.slice(0, levelBands[bandIndex].turns);
 }
 
@@ -361,7 +283,7 @@ const topics = levelBands.flatMap((band, bandIndex) =>
       level: band.level,
       stageId: band.stageId,
       variant: variant.label,
-      lines: makeLines(seed, bandIndex, band.level, variant),
+      lines: makeLines(seed, bandIndex, band.level, variant, seedIndex),
       listenTask: `Nghe hội thoại về ${seed[3]} để xác định chủ đề, ví dụ, chức năng giao tiếp và phần ${variant.viFocus}.`,
       speakTask: `${band.speak} Trọng tâm: ${band.viFunction}. Chủ đề: ${seed[1]}. Bài ${variantIndex + 1}: ${variant.label}.`,
     }))
