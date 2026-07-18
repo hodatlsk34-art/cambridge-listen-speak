@@ -313,20 +313,61 @@ function illustrationKind(paperName: string, item: PracticeItem) {
   return paperName.includes("Nói") ? "compare" : "large";
 }
 
-function ExamIllustration({ paperName, item }: { test: CambridgePracticeTest; paperName: string; item: PracticeItem }) {
+function ExamIllustration({ test, paperName, item }: { test: CambridgePracticeTest; paperName: string; item: PracticeItem }) {
   if (!needsIllustration(paperName, item)) return null;
   const kind = illustrationKind(paperName, item);
+  const visualIndex = (Number(test.id.match(/practice-(\d+)/)?.[1] ?? 1) - 1) % 6;
+  const visualSets = [
+    {
+      story: [["1", "morning", "A learner opens a school bag."], ["2", "class", "Friends look at a project poster."], ["3", "park", "The group collects ideas outside."], ["4", "show", "They present the finished work."]],
+      compare: ["Two students are planning an outdoor activity.", "Two students are working together in a classroom."],
+      options: [["A", "library", "quiet study"], ["B", "market", "buying fruit"], ["C", "station", "waiting for a bus"]],
+      sky: ["kite", "cloud", "sun"],
+      children: ["Ben", "Daisy", "Emma", "Jack", "Mia"],
+    },
+    {
+      story: [["1", "rain", "A class trip changes because it rains."], ["2", "museum", "The learners look at a display."], ["3", "cafe", "They write notes together."], ["4", "bus", "They go home with new ideas."]],
+      compare: ["A family is packing for a short journey.", "A family is checking a map indoors."],
+      options: [["A", "museum", "looking at art"], ["B", "cafe", "having a snack"], ["C", "bus stop", "waiting in the rain"]],
+      sky: ["umbrella", "cloud", "bus"],
+      children: ["Daisy", "Leo", "Anna", "Sam", "Ruby"],
+    },
+    {
+      story: [["1", "club", "Students choose a club project."], ["2", "camera", "They record a short video."], ["3", "screen", "They edit their work."], ["4", "prize", "The class watches the film."]],
+      compare: ["Students are filming an interview.", "Students are editing a video on a computer."],
+      options: [["A", "studio", "recording a video"], ["B", "computer room", "editing pictures"], ["C", "hall", "showing a film"]],
+      sky: ["poster", "camera", "screen"],
+      children: ["Emma", "Tom", "Grace", "Harry", "Nina"],
+    },
+    {
+      story: [["1", "field", "Friends meet for sports day."], ["2", "race", "They prepare the equipment."], ["3", "break", "They share drinks after the race."], ["4", "medal", "Everyone celebrates fairly."]],
+      compare: ["Students are playing outside on a sports field.", "Students are organising equipment inside."],
+      options: [["A", "sports field", "running a race"], ["B", "gym", "carrying equipment"], ["C", "shop", "buying drinks"]],
+      sky: ["flag", "ball", "medal"],
+      children: ["Jack", "Mia", "Oscar", "Lily", "Noah"],
+    },
+    {
+      story: [["1", "garden", "Volunteers arrive at a community garden."], ["2", "plants", "They choose where to plant flowers."], ["3", "sign", "They make labels for each bed."], ["4", "open", "Visitors come to see the garden."]],
+      compare: ["People are planting flowers outside.", "People are planning a display at a table."],
+      options: [["A", "garden", "planting flowers"], ["B", "table", "making labels"], ["C", "gate", "welcoming visitors"]],
+      sky: ["tree", "flower", "sign"],
+      children: ["Mia", "Ben", "Chloe", "Ethan", "Zoe"],
+    },
+    {
+      story: [["1", "art room", "Learners prepare a media display."], ["2", "microphone", "One student records an interview."], ["3", "poster", "The team fixes the poster."], ["4", "gallery", "People visit the finished display."]],
+      compare: ["Students are recording an interview.", "Students are presenting a poster to visitors."],
+      options: [["A", "art room", "making a poster"], ["B", "desk", "recording audio"], ["C", "gallery", "talking to visitors"]],
+      sky: ["paint", "map", "camera"],
+      children: ["Tom", "Daisy", "Alex", "Grace", "Max"],
+    },
+  ];
+  const visual = visualSets[visualIndex];
 
   if (kind === "story") {
     return <div className="exam-illustration" aria-label="Picture story illustration">
       <b>Picture story</b>
       <div className="story-strip">
-        {[
-          ["1", "morning", "A learner opens a school bag."],
-          ["2", "class", "Friends look at a project poster."],
-          ["3", "park", "The group collects ideas outside."],
-          ["4", "show", "They present the finished work."],
-        ].map(([number, label, caption]) => <div className="story-panel" key={number}>
+        {visual.story.map(([number, label, caption]) => <div className="story-panel" key={number}>
           <span>{number}</span>
           <i>{label}</i>
           <p>{caption}</p>
@@ -342,12 +383,12 @@ function ExamIllustration({ paperName, item }: { test: CambridgePracticeTest; pa
         <div className="picture-panel sunny">
           <span>Picture A</span>
           <div className="scene-row"><i className="sun" /><i className="bench" /><i className="person blue" /></div>
-          <p>Two students are planning an outdoor activity.</p>
+          <p>{visual.compare[0]}</p>
         </div>
         <div className="picture-panel indoor">
           <span>Picture B</span>
           <div className="scene-row"><i className="window" /><i className="desk" /><i className="person coral" /></div>
-          <p>Two students are working together in a classroom.</p>
+          <p>{visual.compare[1]}</p>
         </div>
       </div>
     </div>;
@@ -357,11 +398,7 @@ function ExamIllustration({ paperName, item }: { test: CambridgePracticeTest; pa
     return <div className="exam-illustration" aria-label="Choose from picture options">
       <b>Choose A, B or C</b>
       <div className="picture-options">
-        {[
-          ["A", "library", "quiet study"],
-          ["B", "market", "buying fruit"],
-          ["C", "station", "waiting for a bus"],
-        ].map(([letter, title, caption]) => <div className="picture-option" key={letter}>
+        {visual.options.map(([letter, title, caption]) => <div className="picture-option" key={letter}>
           <strong>{letter}</strong>
           <span>{title}</span>
           <i className={`option-scene ${title}`} />
@@ -374,9 +411,9 @@ function ExamIllustration({ paperName, item }: { test: CambridgePracticeTest; pa
   return <div className="exam-illustration" aria-label="Large picture illustration">
     <b>Large picture</b>
     <div className="large-picture">
-      <div className="picture-sky"><span>kite</span><span>cloud</span><span>sun</span></div>
+      <div className="picture-sky">{visual.sky.map(label => <span key={label}>{label}</span>)}</div>
       <div className="picture-ground">
-        {["Ben", "Daisy", "Emma", "Jack", "Mia"].map((name, index) => <span className={`child child-${index + 1}`} key={name}>{name}</span>)}
+        {visual.children.map((name, index) => <span className={`child child-${index + 1}`} key={name}>{name}</span>)}
         <i className="tree" />
         <i className="table" />
         <i className="ball" />

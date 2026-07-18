@@ -26,6 +26,26 @@ export type CambridgePracticeTest = {
 const youngThemes = ["Một ngày ở trường", "Tham quan sở thú", "Cuối tuần cùng gia đình", "Đồ ăn và bữa tiệc", "Kỳ nghỉ ngày mưa", "Ngày hội thể thao"];
 const teenThemes = ["Câu lạc bộ mới", "Kế hoạch du lịch", "Thói quen lành mạnh", "Công nghệ ở trường", "Lựa chọn khi mua sắm", "Cuối tuần trong thành phố"];
 const advancedThemes = ["Học tập trong tương lai", "Dự án cộng đồng", "Thói quen truyền thông", "Học tập và công việc", "Lựa chọn vì môi trường", "Văn hóa và bản sắc"];
+const englishTheme: Record<string, string> = {
+  "Một ngày ở trường": "a day at school",
+  "Tham quan sở thú": "a visit to the zoo",
+  "Cuối tuần cùng gia đình": "a family weekend",
+  "Đồ ăn và bữa tiệc": "food and a party",
+  "Kỳ nghỉ ngày mưa": "a rainy holiday",
+  "Ngày hội thể thao": "a sports day",
+  "Câu lạc bộ mới": "a new club",
+  "Kế hoạch du lịch": "travel plans",
+  "Thói quen lành mạnh": "healthy habits",
+  "Công nghệ ở trường": "technology at school",
+  "Lựa chọn khi mua sắm": "shopping choices",
+  "Cuối tuần trong thành phố": "a weekend in the city",
+  "Học tập trong tương lai": "learning in the future",
+  "Dự án cộng đồng": "a community project",
+  "Thói quen truyền thông": "media habits",
+  "Học tập và công việc": "study and work",
+  "Lựa chọn vì môi trường": "environmental choices",
+  "Văn hóa và bản sắc": "culture and identity",
+};
 
 function item(part: string, taskType: string, instruction: string, sampleQuestion: string, answerKey: string, skillFocus: string): CambridgePracticeItem {
   return { part, taskType, instruction, sampleQuestion, answerKey, skillFocus };
@@ -436,7 +456,208 @@ function c2Test(index: number): CambridgePracticeTest {
   };
 }
 
-export const cambridgePracticeBank: CambridgePracticeTest[] = [
+const questionSets = [
+  {
+    child: "Ben",
+    object: "blue bag",
+    count: "5",
+    food: "sandwich",
+    colourTask: "Colour the small kite next to the tree.",
+    colourAnswer: "small kite = green",
+    yesNo1: "This is a banana.",
+    yesNoAnswer1: "yes",
+    yesNo2: "The cat is under the chair.",
+    yesNoAnswer2: "yes",
+    spelling: "o / d / g",
+    spellingAnswer: "dog",
+    gap: "I can see a ___ in the garden.",
+    gapAnswer: "bird",
+    colourQuestion: "What colour is the ball?",
+    colourAnswer2: "red",
+    place: "library",
+    time: "3:30",
+    price: "12",
+    room: "204",
+    activity: "making a video",
+    problem: "The bus was late.",
+    opinion: "Small actions can create useful change.",
+    speaking: "Choose the best activity for a class project.",
+  },
+  {
+    child: "Daisy",
+    object: "yellow towel",
+    count: "7",
+    food: "apple juice",
+    colourTask: "Colour the balloon above the table.",
+    colourAnswer: "balloon = blue",
+    yesNo1: "This is a carrot.",
+    yesNoAnswer1: "no",
+    yesNo2: "The dog is beside the tree.",
+    yesNoAnswer2: "yes",
+    spelling: "a / h / t",
+    spellingAnswer: "hat",
+    gap: "There is a ___ on the wall.",
+    gapAnswer: "clock",
+    colourQuestion: "What colour is the kite?",
+    colourAnswer2: "green",
+    place: "sports hall",
+    time: "4:15",
+    price: "15",
+    room: "118",
+    activity: "drawing a poster",
+    problem: "The ticket was missing.",
+    opinion: "Clear signs help people feel more confident.",
+    speaking: "Choose the best way to welcome new students.",
+  },
+  {
+    child: "Emma",
+    object: "red coat",
+    count: "9",
+    food: "salad",
+    colourTask: "Write 'star' under the small cloud.",
+    colourAnswer: "star",
+    yesNo1: "This is a tiger.",
+    yesNoAnswer1: "yes",
+    yesNo2: "The girl is holding a book.",
+    yesNoAnswer2: "no",
+    spelling: "k / o / o / b",
+    spellingAnswer: "book",
+    gap: "The children are playing near the ___.",
+    gapAnswer: "river",
+    colourQuestion: "What colour is the door?",
+    colourAnswer2: "yellow",
+    place: "museum entrance",
+    time: "10:15",
+    price: "18",
+    room: "305",
+    activity: "building a model",
+    problem: "The room had changed.",
+    opinion: "Teamwork made the project easier to finish.",
+    speaking: "Choose the most useful display for a school fair.",
+  },
+  {
+    child: "Jack",
+    object: "green skateboard",
+    count: "3",
+    food: "rice and chicken",
+    colourTask: "Colour the scarf on the chair.",
+    colourAnswer: "scarf = purple",
+    yesNo1: "This is a shell.",
+    yesNoAnswer1: "yes",
+    yesNo2: "The boy is riding a bike.",
+    yesNoAnswer2: "yes",
+    spelling: "s / h / i / f",
+    spellingAnswer: "fish",
+    gap: "Mum put the ___ next to the window.",
+    gapAnswer: "plant",
+    colourQuestion: "What colour is the shirt?",
+    colourAnswer2: "blue",
+    place: "train station",
+    time: "2:45",
+    price: "20",
+    room: "42",
+    activity: "taking photos",
+    problem: "The train was delayed.",
+    opinion: "Planning early avoids small problems later.",
+    speaking: "Choose the best activity for a rainy weekend.",
+  },
+  {
+    child: "Mia",
+    object: "orange lunch box",
+    count: "6",
+    food: "tomato soup",
+    colourTask: "Colour the small boat in the picture.",
+    colourAnswer: "small boat = orange",
+    yesNo1: "This is a guitar.",
+    yesNoAnswer1: "no",
+    yesNo2: "The bird is on the roof.",
+    yesNoAnswer2: "yes",
+    spelling: "c / a / k / e",
+    spellingAnswer: "cake",
+    gap: "Dad opened the ___ before lunch.",
+    gapAnswer: "window",
+    colourQuestion: "What colour is the flower?",
+    colourAnswer2: "pink",
+    place: "community garden",
+    time: "11:30",
+    price: "9",
+    room: "27",
+    activity: "planting flowers",
+    problem: "The weather changed suddenly.",
+    opinion: "Trying a small idea first can save time.",
+    speaking: "Choose the best project for the local park.",
+  },
+  {
+    child: "Tom",
+    object: "black camera",
+    count: "8",
+    food: "vegetable pasta",
+    colourTask: "Write 'winner' below the table.",
+    colourAnswer: "winner",
+    yesNo1: "This is a sweater.",
+    yesNoAnswer1: "yes",
+    yesNo2: "The horse is behind the house.",
+    yesNoAnswer2: "no",
+    spelling: "m / a / p",
+    spellingAnswer: "map",
+    gap: "The class visited the ___ yesterday.",
+    gapAnswer: "theatre",
+    colourQuestion: "What colour is the bag?",
+    colourAnswer2: "brown",
+    place: "art room",
+    time: "1:20",
+    price: "14",
+    room: "16",
+    activity: "recording an interview",
+    problem: "The microphone stopped working.",
+    opinion: "Regular reviews show what is really useful.",
+    speaking: "Choose the best tool for a media project.",
+  },
+];
+
+function personaliseItem(test: CambridgePracticeTest, paper: CambridgePracticePaper, paperIndex: number, itemIndex: number, original: CambridgePracticeItem): CambridgePracticeItem {
+  const set = questionSets[(Number(test.id.match(/practice-(\d+)/)?.[1] ?? 1) - 1) % questionSets.length];
+  const text = `${paper.paper} ${original.part} ${original.taskType} ${original.sampleQuestion}`.toLowerCase();
+  const topic = englishTheme[test.theme] ?? "the topic";
+  if (original.answerKey === "học viên tự trả lời") {
+    const openPrompts = [
+      `Talk about ${topic}: what would you choose and why?`,
+      `Describe the picture for ${topic} and give two details.`,
+      `Discuss this question: ${set.speaking}`,
+      `Write an answer about ${topic}. Include a reason and an example.`,
+    ];
+    return { ...original, sampleQuestion: openPrompts[(paperIndex + itemIndex) % openPrompts.length] };
+  }
+  if (text.includes("which child") || text.includes("which girl")) return { ...original, sampleQuestion: `Which child is ${set.child} in the picture?`, answerKey: `${set.child} is next to the ${set.object}.` };
+  if (text.includes("how many")) return { ...original, sampleQuestion: "How many things are on the desk?", answerKey: set.count };
+  if (text.includes("lunch") || text.includes("buy for lunch") || text.includes("want for lunch")) return { ...original, sampleQuestion: "What food do they choose?", answerKey: set.food };
+  if (text.includes("colour") || text.includes("write 'sun'") || text.includes("winner")) return { ...original, sampleQuestion: set.colourTask, answerKey: set.colourAnswer };
+  if (text.includes("banana") || text.includes("carrot") || text.includes("this is")) return { ...original, sampleQuestion: set.yesNo1, answerKey: set.yesNoAnswer1 };
+  if (text.includes("cat") || text.includes("under") || text.includes("beside")) return { ...original, sampleQuestion: set.yesNo2, answerKey: set.yesNoAnswer2 };
+  if (text.includes("o / d / g")) return { ...original, sampleQuestion: set.spelling, answerKey: set.spellingAnswer };
+  if (text.includes("i can see") || text.includes("___ in") || text.includes("___ on")) return { ...original, sampleQuestion: set.gap, answerKey: set.gapAnswer };
+  if (text.includes("what colour")) return { ...original, sampleQuestion: set.colourQuestion, answerKey: set.colourAnswer2 };
+  if (text.includes("where did") || text.includes("where will") || text.includes("meet")) return { ...original, sampleQuestion: "Where will the class meet?", answerKey: set.place };
+  if (text.includes("what time") || text.includes("starts at")) return { ...original, sampleQuestion: "What time does the activity start?", answerKey: set.time };
+  if (text.includes("costs")) return { ...original, sampleQuestion: "The trip costs ___ pounds.", answerKey: set.price };
+  if (text.includes("room number")) return { ...original, sampleQuestion: "The room number is ___.", answerKey: set.room };
+  if (text.includes("activity")) return { ...original, sampleQuestion: "What activity did the student choose?", answerKey: set.activity };
+  if (text.includes("problem")) return { ...original, sampleQuestion: "What is the speaker's problem?", answerKey: set.problem };
+  if (text.includes("main opinion") || text.includes("attitude") || text.includes("criticism")) return { ...original, sampleQuestion: "What is the writer's main point?", answerKey: set.opinion };
+  return original;
+}
+
+function personaliseTest(test: CambridgePracticeTest): CambridgePracticeTest {
+  return {
+    ...test,
+    papers: test.papers.map((paper, paperIndex) => ({
+      ...paper,
+      items: paper.items.map((practiceItem, itemIndex) => personaliseItem(test, paper, paperIndex, itemIndex, practiceItem)),
+    })),
+  };
+}
+
+const baseCambridgePracticeBank: CambridgePracticeTest[] = [
   ...Array.from({ length: 6 }, (_, index) => startersTest(index)),
   ...Array.from({ length: 6 }, (_, index) => moversTest(index)),
   ...Array.from({ length: 6 }, (_, index) => flyersTest(index)),
@@ -446,3 +667,5 @@ export const cambridgePracticeBank: CambridgePracticeTest[] = [
   ...Array.from({ length: 4 }, (_, index) => c1Test(index)),
   ...Array.from({ length: 4 }, (_, index) => c2Test(index)),
 ];
+
+export const cambridgePracticeBank: CambridgePracticeTest[] = baseCambridgePracticeBank.map(personaliseTest);
