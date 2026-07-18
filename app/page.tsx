@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { cambridgePracticeBank, type CambridgePracticeItem, type CambridgePracticeTest } from "./data/cambridgePracticeBank";
+import { cambridgePracticeBank, type CambridgePracticeTest } from "./data/cambridgePracticeBank";
 
 const levels = [
   { id: "pre-a1", short: "Pre A1", name: "Starters", icon: "🦁", color: "yellow", age: "6–8 tuổi", listen: "Nghe từ, số và mô tả ngắn", speak: "Chào hỏi, gọi tên và trả lời đơn" },
@@ -119,6 +119,42 @@ const cambridgeExamFormats = [
       { title: "So sánh và suy đoán", skill: "Nói", sample: "So sánh hai ảnh, suy đoán tình huống và nêu lựa chọn." },
     ],
   },
+  {
+    id: "c1",
+    level: "C1",
+    exam: "Advanced",
+    age: "Người lớn · học thuật",
+    description: "Dành cho người học cần dùng tiếng Anh linh hoạt trong học thuật, công việc và thảo luận chuyên sâu.",
+    papers: [
+      { name: "Đọc & Sử dụng tiếng Anh", time: "90 phút", parts: 8, tasks: ["Điền từ trắc nghiệm", "Điền từ mở", "Cấu tạo từ", "Biến đổi câu", "Đọc hiểu dài", "So sánh văn bản", "Điền đoạn", "Nối thông tin"] },
+      { name: "Viết", time: "90 phút", parts: 2, tasks: ["Viết luận bắt buộc", "Viết báo cáo/đề xuất/đánh giá/thư"] },
+      { name: "Nghe", time: "khoảng 40 phút", parts: 4, tasks: ["Trắc nghiệm đoạn ngắn", "Hoàn thành câu", "Phỏng vấn trắc nghiệm", "Nối ý kiến"] },
+      { name: "Nói", time: "15 phút", parts: 4, tasks: ["Phỏng vấn", "Lượt nói dài", "Thảo luận cộng tác", "Thảo luận mở rộng"] },
+    ],
+    practice: [
+      { title: "Biến đổi câu nâng cao", skill: "Sử dụng tiếng Anh", sample: "Dùng cấu trúc nâng cao để viết lại câu giữ nguyên nghĩa." },
+      { title: "Viết đề xuất", skill: "Viết", sample: "Viết proposal có mục tiêu, đề xuất cụ thể và lý do thuyết phục." },
+      { title: "Thảo luận quan điểm", skill: "Nói", sample: "So sánh lựa chọn, đánh giá ưu/nhược điểm và đi đến quyết định." },
+    ],
+  },
+  {
+    id: "c2",
+    level: "C2",
+    exam: "Proficiency",
+    age: "Người lớn · chuyên sâu",
+    description: "Dành cho người học cần độ chính xác, sắc thái và khả năng xử lý văn bản/hội thoại phức tạp.",
+    papers: [
+      { name: "Đọc & Sử dụng tiếng Anh", time: "90 phút", parts: 7, tasks: ["Điền từ trắc nghiệm", "Điền từ mở", "Cấu tạo từ", "Biến đổi câu", "Đọc hiểu dài", "Điền đoạn", "Nối thông tin"] },
+      { name: "Viết", time: "90 phút", parts: 2, tasks: ["Viết luận tổng hợp", "Viết bài/báo cáo/thư/đánh giá"] },
+      { name: "Nghe", time: "khoảng 40 phút", parts: 4, tasks: ["Trắc nghiệm đoạn ngắn", "Hoàn thành câu", "Phỏng vấn trắc nghiệm", "Nối thông tin"] },
+      { name: "Nói", time: "16 phút", parts: 3, tasks: ["Phỏng vấn", "Nhiệm vụ cộng tác", "Lượt nói cá nhân và thảo luận"] },
+    ],
+    practice: [
+      { title: "Sắc thái từ vựng", skill: "Sử dụng tiếng Anh", sample: "Chọn từ/cụm từ chính xác theo sắc thái và văn phong." },
+      { title: "Luận tổng hợp", skill: "Viết", sample: "Tóm lược, đánh giá và phát triển lập luận từ hai văn bản." },
+      { title: "Tranh luận chuyên sâu", skill: "Nói", sample: "Phát triển quan điểm trừu tượng với ví dụ và phản biện." },
+    ],
+  },
 ];
 
 const lessonTopics = [
@@ -177,24 +213,121 @@ function lessonContent(lesson: Lesson) {
   return { transcript, questions, prompt: advanced ? `Give a 60-90 second response about ${englishTopic}. State your view, give an example, acknowledge another perspective and conclude.` : mid ? `Talk for 45 seconds about ${englishTopic}. Give your opinion and two supporting details.` : `Look at the picture and say 4-6 simple sentences about ${englishTopic}.`, target: advanced ? "Độ trôi chảy · độ đa dạng từ vựng · liên kết ý · phát âm" : mid ? "Ý rõ ràng · từ nối · phát âm" : "Từ khóa đúng · câu hoàn chỉnh · âm rõ" };
 }
 
-function testMaterial(test: CambridgePracticeTest, paperName: string, item: CambridgePracticeItem) {
+function cleanAnswer(answer: string) {
+  return answer.replace(/^[A-Z][a-z]+ is /, "").replace(/\s*=\s*/g, " is ").replace(/^học viên tự trả lời$/, "your own ideas");
+}
+
+function testMaterial(test: CambridgePracticeTest, paper: CambridgePracticeTest["papers"][number]) {
   const theme = test.theme.toLowerCase();
-  if (paperName.includes("Nghe")) {
+  const facts = paper.items.filter(item => item.answerKey !== "học viên tự trả lời").map(item => cleanAnswer(item.answerKey));
+  if (paper.paper.includes("Nghe")) {
+    const detailLines = facts.slice(0, 6).map((fact, index) => `Detail ${index + 1}: ${fact}.`).join(" ");
     return {
       label: "Nội dung nghe",
-      text: `Speaker 1: Today we are talking about ${theme}. Please listen carefully. Speaker 2: First, look at ${item.part}. ${item.instruction} Speaker 1: Here is the important information. ${item.sampleQuestion} The answer you need is: ${item.answerKey}. Listen again and check the details before you write your answer.`,
+      text: `Narrator: You will hear a conversation about ${theme}. Listen carefully and answer the questions. Examiner: The speakers are planning an activity. ${detailLines} Speaker A: I think these details are important, so please write them carefully. Speaker B: Yes, I will check the names, numbers, places and objects before we finish.`,
     };
   }
-  if (paperName.includes("Đọc") || paperName.includes("Viết") || paperName.includes("Sử dụng")) {
+  if (paper.paper.includes("Đọc") || paper.paper.includes("Viết") || paper.paper.includes("Sử dụng")) {
+    const readingDetails = facts.slice(0, 8).map((fact, index) => `Point ${index + 1}: ${fact}.`).join(" ");
     return {
       label: "Nội dung đề",
-      text: `Read this text about ${theme}. Last week, a group of students joined an activity connected with this topic. They had to make a plan, ask for information, and choose the best option. Some students wanted something simple and familiar, while others preferred a new challenge. In the end, they agreed that careful preparation helped them enjoy the activity more. Use this text, the notice, or the short message to answer the question below.`,
+      text: `Read the text. The article is about ${theme}. A group of learners took part in a short project and recorded the most useful information. ${readingDetails} The writer says that good preparation, clear instructions and a careful review helped the group complete the task successfully.`,
     };
   }
   return {
     label: "Thẻ nói / gợi ý",
     text: `Candidate card: Talk about ${theme}. Say what you can see or imagine, give one reason, and ask or answer a follow-up question. Try to speak clearly and use complete sentences.`,
   };
+}
+
+type PracticePaper = CambridgePracticeTest["papers"][number];
+type PracticeItem = PracticePaper["items"][number];
+
+function needsIllustration(paperName: string, item: PracticeItem) {
+  const text = `${paperName} ${item.part} ${item.taskType} ${item.instruction} ${item.sampleQuestion}`.toLowerCase();
+  return /picture|photo|story|colour|color|tranh|ảnh|tô màu|nối tên|chọn tranh|mô tả ảnh|so sánh|kể chuyện|thẻ nói|find|describe|compare|which|what colour|where is/.test(text);
+}
+
+function illustrationKind(paperName: string, item: PracticeItem) {
+  const text = `${paperName} ${item.taskType} ${item.instruction} ${item.sampleQuestion}`.toLowerCase();
+  if (/story|kể chuyện|sequence|chuỗi/.test(text)) return "story";
+  if (/compare|so sánh|different|khác nhau/.test(text)) return "compare";
+  if (/colour|color|tô màu|nối tên|find|where is/.test(text)) return "large";
+  if (/chọn tranh|which|what will|where did|3 tranh|multiple choice|trắc nghiệm/.test(text)) return "options";
+  return paperName.includes("Nói") ? "compare" : "large";
+}
+
+function ExamIllustration({ paperName, item }: { test: CambridgePracticeTest; paperName: string; item: PracticeItem }) {
+  if (!needsIllustration(paperName, item)) return null;
+  const kind = illustrationKind(paperName, item);
+
+  if (kind === "story") {
+    return <div className="exam-illustration" aria-label="Picture story illustration">
+      <b>Picture story</b>
+      <div className="story-strip">
+        {[
+          ["1", "morning", "A learner opens a school bag."],
+          ["2", "class", "Friends look at a project poster."],
+          ["3", "park", "The group collects ideas outside."],
+          ["4", "show", "They present the finished work."],
+        ].map(([number, label, caption]) => <div className="story-panel" key={number}>
+          <span>{number}</span>
+          <i>{label}</i>
+          <p>{caption}</p>
+        </div>)}
+      </div>
+    </div>;
+  }
+
+  if (kind === "compare") {
+    return <div className="exam-illustration" aria-label="Compare two pictures">
+      <b>Compare the pictures</b>
+      <div className="compare-pictures">
+        <div className="picture-panel sunny">
+          <span>Picture A</span>
+          <div className="scene-row"><i className="sun" /><i className="bench" /><i className="person blue" /></div>
+          <p>Two students are planning an outdoor activity.</p>
+        </div>
+        <div className="picture-panel indoor">
+          <span>Picture B</span>
+          <div className="scene-row"><i className="window" /><i className="desk" /><i className="person coral" /></div>
+          <p>Two students are working together in a classroom.</p>
+        </div>
+      </div>
+    </div>;
+  }
+
+  if (kind === "options") {
+    return <div className="exam-illustration" aria-label="Choose from picture options">
+      <b>Choose A, B or C</b>
+      <div className="picture-options">
+        {[
+          ["A", "library", "quiet study"],
+          ["B", "market", "buying fruit"],
+          ["C", "station", "waiting for a bus"],
+        ].map(([letter, title, caption]) => <div className="picture-option" key={letter}>
+          <strong>{letter}</strong>
+          <span>{title}</span>
+          <i className={`option-scene ${title}`} />
+          <p>{caption}</p>
+        </div>)}
+      </div>
+    </div>;
+  }
+
+  return <div className="exam-illustration" aria-label="Large picture illustration">
+    <b>Large picture</b>
+    <div className="large-picture">
+      <div className="picture-sky"><span>kite</span><span>cloud</span><span>sun</span></div>
+      <div className="picture-ground">
+        {["Ben", "Daisy", "Emma", "Jack", "Mia"].map((name, index) => <span className={`child child-${index + 1}`} key={name}>{name}</span>)}
+        <i className="tree" />
+        <i className="table" />
+        <i className="ball" />
+      </div>
+      <p>Use the picture for matching names, finding objects, colouring, or short answers.</p>
+    </div>
+  </div>;
 }
 
 export default function Home() {
@@ -361,7 +494,7 @@ export default function Home() {
         {activePracticeTest && <div className="test-bank">
           <div className="test-bank-head">
             <div>
-              <span className="kicker">NGÂN HÀNG 36 ĐỀ LUYỆN</span>
+              <span className="kicker">NGÂN HÀNG {cambridgePracticeBank.length} ĐỀ LUYỆN</span>
               <h3>{activePracticeTest.title}</h3>
               <p>{activePracticeTest.level} {activePracticeTest.exam} · Chủ đề: {activePracticeTest.theme}</p>
             </div>
@@ -373,21 +506,21 @@ export default function Home() {
             </div>
           </div>
           <div className="test-paper-list">
-            {activePracticeTest.papers.map(paper => <article key={paper.paper} className="test-paper">
+            {activePracticeTest.papers.map(paper => { const material = testMaterial(activePracticeTest, paper); const audioKey = `${activePracticeTest.id}-${paper.paper}`; return <article key={paper.paper} className="test-paper">
               <header><b>{paper.paper}</b><span>{paper.time}</span></header>
+              <div className="test-material paper-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(audioKey, material.text)}>{testAudioKey===audioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>
               <div className="test-items">
-                {paper.items.map(item => { const material = testMaterial(activePracticeTest, paper.paper, item); const audioKey = `${activePracticeTest.id}-${paper.paper}-${item.part}`; return <section key={`${paper.paper}-${item.part}`}>
+                {paper.items.map(item => <section key={`${paper.paper}-${item.part}`}>
                   <div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div>
                   <p>{item.instruction}</p>
-                  <div className="test-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(audioKey, material.text)}>{testAudioKey===audioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>
+                  <ExamIllustration test={activePracticeTest} paperName={paper.paper} item={item} />
                   <ul>
                     <li><b>Câu hỏi:</b> {item.sampleQuestion}</li>
-                    <li><b>Đáp án/gợi ý:</b> {item.answerKey}</li>
                     <li><b>Trọng tâm:</b> {item.skillFocus}</li>
                   </ul>
-                </section>; })}
+                </section>)}
               </div>
-            </article>)}
+            </article>; })}
           </div>
         </div>}
       </section>}
@@ -402,7 +535,7 @@ export default function Home() {
 
       {activeView === "progress" && <section className="progress-section page-view" id="progress"><div><span className="kicker light">TIẾN BỘ MỖI NGÀY</span><h2>Biết mình đang ở đâu<br/>và cần luyện gì tiếp theo.</h2><p>Theo dõi số phút nghe, lượt nói, từ vựng đã học và mức độ hoàn thành từng kỹ năng.</p><button className="button white" onClick={()=>openView("roadmap")}>Bắt đầu lộ trình miễn phí →</button></div><div className="dashboard"><div className="streak">🔥 <b>7 ngày</b><small>Chuỗi học liên tục</small></div><div className="stats"><span><b>84</b><small>phút nghe</small></span><span><b>36</b><small>lượt nói</small></span><span><b>12</b><small>bài hoàn thành</small></span></div><div className="bars"><p>Nghe <span>72%</span></p><i><b style={{width:"72%"}}/></i><p>Nói <span>58%</span></p><i><b style={{width:"58%"}}/></i></div></div></section>}
 
-      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Mỗi phần có nội dung đề, câu hỏi và ô trả lời. Phần nghe có nút phát audio bằng giọng đọc trình duyệt.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const audioKey = `${activePracticeTest.id}-work-${paper.paper}-${item.part}`; const material = testMaterial(activePracticeTest, paper.paper, item); const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div><p>{item.instruction}</p><div className="test-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(audioKey, material.text)}>{testAudioKey===audioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Viết câu trả lời để giáo viên hoặc học viên tự chấm theo tiêu chí." : "Nhập đáp án của bạn..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Đúng" : `Chưa đúng. Đáp án/gợi ý: ${item.answerKey}`}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">Câu này cần tự chấm theo trọng tâm: {item.skillFocus}.</p>}</article>; })}</section>)}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Chấm bài</button>{testChecked && <strong>Kết quả tự động: {testScore}/{gradableItems.length} câu có đáp án cố định</strong>}</footer></div></div>}
+      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Mỗi paper có một nội dung đề riêng; câu hỏi bên dưới không lặp lại bài đọc hoặc bài nghe.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => { const material = testMaterial(activePracticeTest, paper); const paperAudioKey = `${activePracticeTest.id}-work-${paper.paper}`; return <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div><div className="test-material paper-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(paperAudioKey, material.text)}>{testAudioKey===paperAudioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div><p>{item.instruction}</p><ExamIllustration test={activePracticeTest} paperName={paper.paper} item={item} /><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Viết câu trả lời để giáo viên hoặc học viên tự chấm theo tiêu chí." : "Nhập đáp án của bạn..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Đúng" : `Chưa đúng. Đáp án/gợi ý: ${item.answerKey}`}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">Câu này cần tự chấm theo trọng tâm: {item.skillFocus}.</p>}</article>; })}</section>; })}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Chấm bài</button>{testChecked && <strong>Kết quả tự động: {testScore}/{gradableItems.length} câu có đáp án cố định</strong>}</footer></div></div>}
       {openLesson && detail && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closeDetail}/><div className="lesson-panel"><button className="close" onClick={closeDetail}>×</button><header><span className="lesson-icon">{openLesson.icon}</span><div><span className="pill blue">{openLesson.level} · {openLesson.exam}</span><h2>{openLesson.title}</h2><p>{openLesson.topic} · {openLesson.time}</p></div></header><div className="lesson-tabs"><span>1. Nghe hiểu</span><span>2. Kiểm tra</span><span>3. Luyện nói</span></div><section className="listen-block"><h3>🎧 Bài nghe</h3><div className="accent-picker"><b>Chọn giọng đọc:</b><button className={accent==="en-GB"?"selected":""} onClick={()=>setAccent("en-GB")}>🇬🇧 Anh–Anh</button><button className={accent==="en-US"?"selected":""} onClick={()=>setAccent("en-US")}>🇺🇸 Anh–Mỹ</button></div><div className="audio-player"><button onClick={playLesson}>{lessonAudio?"Ⅱ":"▶"}</button><Wave active={lessonAudio}/><span>{lessonAudio?"Đang phát...":accent==="en-GB"?"Giọng Anh–Anh · 1×":"Giọng Anh–Mỹ · 1×"}</span></div><button className="transcript-toggle" onClick={()=>setShowTranscript(!showTranscript)}>{showTranscript?"Ẩn transcript":"Hiện transcript sau khi nghe"}</button>{showTranscript&&<div className="transcript">{detail.transcript}</div>}</section><section><h3>✅ Câu hỏi nghe hiểu</h3><div className="quiz">{detail.questions.map((q,i)=><article key={q.q}><b>{i+1}. {q.q}</b>{q.options.map((o,j)=><label key={o} className={checked?(j===q.answer?"correct":answers[i]===j?"wrong":""):""}><input type="radio" name={`q${i}`} checked={answers[i]===j} onChange={()=>setAnswers(a=>({...a,[i]:j}))}/>{o}</label>)}{checked&&<p>💡 {q.explain}</p>}</article>)}</div><button className="button primary" onClick={()=>setChecked(true)}>Chấm bài ({Object.keys(answers).length}/3)</button>{checked&&<strong className="score">Kết quả: {detail.questions.filter((q,i)=>answers[i]===q.answer).length}/3 câu đúng</strong>}</section><section className="speaking-practice"><h3>🎙️ Luyện nói & tự chấm</h3><p>{detail.prompt}</p><div className="target">Tiêu chí: {detail.target}</div><button className={`record-button ${speaking?"active":""}`} onClick={recordSpeech}>🎙️ <b>{speaking?"Dừng và lưu bản ghi":"Bắt đầu nói"}</b><small>{speaking?"Đang ghi âm – nhấn để hoàn thành":"Cho phép micro để ghi âm"}</small></button>{speaking&&<Wave active/>}{recordingUrl&&<div className="recording-result"><audio controls src={recordingUrl}/><button onClick={downloadRecording}>⇩ Tải tệp ghi âm</button></div>}{recognisedText&&<div className="ai-feedback"><b>Nhận diện giọng nói: {pronunciationScore}%</b><p>Hệ thống nghe được: “{recognisedText}”</p><small>Điểm dựa trên mức độ nhận diện câu nói; hãy nghe lại bản ghi để tự điều chỉnh âm, nhịp và trọng âm.</small></div>}<p className="privacy-note">Tệp ghi âm chỉ được giữ trong trình duyệt và có thể tải về máy; không tự động tải lên máy chủ.</p></section></div></div>}
       <a className="back-to-top" href="#top" aria-label="Về đầu trang">↑</a>
       <footer className="footer"><div className="brand"><span className="brand-mark">▥</span><span>SpeakUp <b>Cambridge</b></span></div><p>Nền tảng luyện Nghe – Nói theo lộ trình Cambridge và CEFR.</p><span>Nội dung tham khảo cấu trúc Cambridge English; không phải website chính thức của Cambridge.</span></footer>

@@ -326,6 +326,116 @@ function b2Test(index: number): CambridgePracticeTest {
   };
 }
 
+function c1Test(index: number): CambridgePracticeTest {
+  const theme = advancedThemes[(index + 2) % advancedThemes.length];
+  return {
+    id: `c1-advanced-practice-${index + 1}`,
+    title: `Đề luyện C1 Advanced ${index + 1}`,
+    levelId: "c1",
+    level: "C1",
+    exam: "Advanced",
+    theme,
+    papers: [
+      {
+        paper: "Đọc và Sử dụng tiếng Anh",
+        time: "90 phút",
+        items: [
+          item("Part 1", "Điền từ trắc nghiệm", "Chọn từ phù hợp nhất cho đoạn văn học thuật.", "The research produced a ___ shift in public opinion.", "significant", "collocation học thuật"),
+          item("Part 2", "Điền từ mở", "Viết một từ vào mỗi chỗ trống.", "The proposal was approved, ___ some members had doubts.", "although", "liên kết nhượng bộ"),
+          item("Part 3", "Cấu tạo từ", "Tạo dạng từ đúng.", "The speaker's argument was both clear and ___. PERSUADE", "persuasive", "họ từ nâng cao"),
+          item("Part 4", "Biến đổi câu", "Hoàn thành câu thứ hai bằng từ khóa.", "The plan only succeeded because the team cooperated. BUT", "But for the team's cooperation, the plan would not have succeeded.", "cấu trúc nâng cao"),
+          item("Part 5", "Trắc nghiệm đọc hiểu", "Đọc bài dài và chọn đáp án chính xác.", "What is the writer's main criticism?", "The policy ignores local differences.", "suy luận thái độ"),
+          item("Part 6", "So sánh văn bản", "So sánh quan điểm trong nhiều đoạn văn.", "Which reviewer partly agrees with Reviewer A?", "Reviewer C", "đối chiếu quan điểm"),
+          item("Part 7", "Điền đoạn", "Chọn đoạn phù hợp với chỗ trống.", "Choose the paragraph that explains the unexpected result.", "Paragraph E", "mạch lập luận"),
+          item("Part 8", "Nối thông tin", "Tìm thông tin cụ thể trong nhiều đoạn.", "Which section mentions a long-term benefit?", "Section D", "đọc quét nâng cao"),
+        ],
+      },
+      {
+        paper: "Viết",
+        time: "90 phút",
+        items: [
+          item("Part 1", "Viết luận", "Viết bài luận phát triển lập luận theo hai ý cho sẵn.", "Write an essay on whether schools should prioritise independent research.", "học viên tự trả lời", "lập luận, liên kết, văn phong học thuật"),
+          item("Part 2", "Viết báo cáo/đề xuất/đánh giá", "Chọn một nhiệm vụ viết đúng văn phong.", "Write a proposal for improving a community learning project.", "học viên tự trả lời", "mục đích giao tiếp và tổ chức ý"),
+        ],
+      },
+      {
+        paper: "Nghe",
+        time: "khoảng 40 phút",
+        items: [
+          item("Part 1", "Trắc nghiệm đoạn ngắn", "Nghe ba đoạn hội thoại và trả lời câu hỏi.", "What does the speaker imply about the decision?", "It was more complex than expected.", "hàm ý"),
+          item("Part 2", "Hoàn thành câu", "Hoàn thành ghi chú từ một bài nói dài.", "The speaker describes confidence as a ___ process.", "gradual", "nghe chi tiết học thuật"),
+          item("Part 3", "Trắc nghiệm phỏng vấn", "Nghe phỏng vấn dài và chọn đáp án.", "What changed the interviewee's perspective?", "working with a diverse team", "suy luận quan điểm"),
+          item("Part 4", "Nối ý kiến", "Nối người nói với ý kiến phù hợp.", "Which speaker emphasises practical constraints?", "Speaker 5", "phân biệt lập trường"),
+        ],
+      },
+      {
+        paper: "Nói",
+        time: "15 phút",
+        items: [
+          item("Part 1", "Phỏng vấn", "Trả lời câu hỏi cá nhân ở mức mở rộng.", "What kind of learning environment helps people think independently?", "học viên tự trả lời", "phát triển ý"),
+          item("Part 2", "Lượt nói dài", "So sánh tranh và trả lời câu hỏi suy luận.", "Compare two approaches to solving a community problem.", "học viên tự trả lời", "so sánh, suy đoán"),
+          item("Part 3", "Thảo luận cộng tác", "Trao đổi lựa chọn và đi đến quyết định.", "Discuss factors that make a public campaign effective.", "học viên tự trả lời", "tương tác nâng cao"),
+          item("Part 4", "Thảo luận mở rộng", "Bàn luận câu hỏi trừu tượng.", "How far should technology influence education policy?", "học viên tự trả lời", "lập luận trừu tượng"),
+        ],
+      },
+    ],
+  };
+}
+
+function c2Test(index: number): CambridgePracticeTest {
+  const theme = advancedThemes[(index + 3) % advancedThemes.length];
+  return {
+    id: `c2-proficiency-practice-${index + 1}`,
+    title: `Đề luyện C2 Proficiency ${index + 1}`,
+    levelId: "c2",
+    level: "C2",
+    exam: "Proficiency",
+    theme,
+    papers: [
+      {
+        paper: "Đọc và Sử dụng tiếng Anh",
+        time: "90 phút",
+        items: [
+          item("Part 1", "Điền từ trắc nghiệm", "Chọn từ/cụm từ chính xác trong văn bản phức tạp.", "The article presents a ___ account of cultural change.", "nuanced", "độ chính xác sắc thái"),
+          item("Part 2", "Điền từ mở", "Viết một từ vào mỗi chỗ trống.", "Little ___ the researchers realise how influential the study would become.", "did", "đảo ngữ"),
+          item("Part 3", "Cấu tạo từ", "Tạo dạng từ phù hợp ngữ cảnh.", "The proposal was criticised for its ___. AMBIGUOUS", "ambiguity", "danh hóa"),
+          item("Part 4", "Biến đổi câu", "Viết lại câu với từ khóa giữ nghĩa.", "The results were not as straightforward as expected. FAR", "The results were far from straightforward.", "cụm diễn đạt tự nhiên"),
+          item("Part 5", "Đọc hiểu dài", "Đọc văn bản dài và chọn đáp án.", "What does the writer suggest about expertise?", "It depends on context as well as knowledge.", "suy luận tinh tế"),
+          item("Part 6", "Điền đoạn", "Chọn đoạn văn phù hợp với mạch lập luận.", "Choose the paragraph that challenges the previous assumption.", "Paragraph G", "liên kết lập luận"),
+          item("Part 7", "Nối thông tin", "Tìm thông tin trong nhiều phần văn bản.", "Which section refers to an overlooked consequence?", "Section B", "đọc chi tiết ở cấp độ cao"),
+        ],
+      },
+      {
+        paper: "Viết",
+        time: "90 phút",
+        items: [
+          item("Part 1", "Viết luận tổng hợp", "Viết bài luận tóm lược và đánh giá hai văn bản ngắn.", "Write an essay evaluating two views on cultural identity.", "học viên tự trả lời", "tổng hợp và đánh giá"),
+          item("Part 2", "Viết bài/báo cáo/thư/đánh giá", "Chọn nhiệm vụ viết dài với văn phong chính xác.", "Write a report assessing a media project and recommending improvements.", "học viên tự trả lời", "giọng văn, sắc thái, tổ chức ý"),
+        ],
+      },
+      {
+        paper: "Nghe",
+        time: "khoảng 40 phút",
+        items: [
+          item("Part 1", "Trắc nghiệm đoạn ngắn", "Nghe đoạn nói phức tạp và chọn đáp án.", "What reservation does the speaker express?", "The evidence is still incomplete.", "hàm ý và thái độ"),
+          item("Part 2", "Hoàn thành câu", "Hoàn thành câu từ bài độc thoại.", "The lecturer calls the first solution ___.", "impractical", "từ vựng đánh giá"),
+          item("Part 3", "Trắc nghiệm phỏng vấn", "Nghe phỏng vấn dài và chọn đáp án.", "What does the interviewee question?", "the reliability of common assumptions", "lập trường"),
+          item("Part 4", "Nối thông tin", "Nối người nói với nhận định phù hợp.", "Which speaker is sceptical about rapid change?", "Speaker 2", "phân biệt sắc thái"),
+        ],
+      },
+      {
+        paper: "Nói",
+        time: "16 phút",
+        items: [
+          item("Part 1", "Phỏng vấn", "Trả lời câu hỏi cá nhân với độ chính xác cao.", "How do people's priorities change as they gain experience?", "học viên tự trả lời", "độ linh hoạt"),
+          item("Part 2", "Nhiệm vụ cộng tác", "Thảo luận lựa chọn dựa trên hình ảnh/gợi ý.", "Discuss which initiatives would have the deepest long-term impact.", "học viên tự trả lời", "tương tác chiến lược"),
+          item("Part 3", "Lượt nói cá nhân và thảo luận", "Nói dài hơn và phát triển tranh luận.", "To what extent can education preserve cultural identity?", "học viên tự trả lời", "lập luận tinh tế"),
+        ],
+      },
+    ],
+  };
+}
+
 export const cambridgePracticeBank: CambridgePracticeTest[] = [
   ...Array.from({ length: 6 }, (_, index) => startersTest(index)),
   ...Array.from({ length: 6 }, (_, index) => moversTest(index)),
@@ -333,5 +443,6 @@ export const cambridgePracticeBank: CambridgePracticeTest[] = [
   ...Array.from({ length: 6 }, (_, index) => a2KeyTest(index)),
   ...Array.from({ length: 6 }, (_, index) => b1Test(index)),
   ...Array.from({ length: 6 }, (_, index) => b2Test(index)),
+  ...Array.from({ length: 4 }, (_, index) => c1Test(index)),
+  ...Array.from({ length: 4 }, (_, index) => c2Test(index)),
 ];
-
