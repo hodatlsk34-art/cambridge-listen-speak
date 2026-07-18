@@ -200,17 +200,46 @@ function lessonContent(lesson: Lesson) {
   const advanced = ["B2","C1","C2"].some(x => lesson.level.startsWith(x));
   const mid = lesson.level.startsWith("B1") || lesson.level.startsWith("A2 Key");
   const englishTopic = lesson.englishTopic;
-  const transcript = advanced
-    ? `Host: Today we are exploring ${englishTopic} and the way it influences everyday decisions. Speaker: In my experience, small choices can have a surprisingly significant effect. Although people may disagree about the best approach, listening carefully helps us understand the reasons behind each opinion. Host: What would you recommend? Speaker: I would begin with a practical goal, review the results, and then adapt the plan rather than expecting an immediate perfect solution.`
-    : mid
-    ? `Anna: Hi Ben. Our topic today is ${englishTopic}. What do you think? Ben: I think it is useful because it is part of everyday life. Anna: Can you give me an example? Ben: Yes. Yesterday I made a simple plan, asked two friends for advice, and then chose the best option. Anna: That sounds sensible. I will try the same idea next time.`
-    : `Lucy: Hello, Tom! Today we are learning about ${englishTopic}. Tom: Great! I can see three things in the picture. Lucy: What is your favourite one? Tom: I like the blue one. It is small and friendly. Lucy: Let us listen, point, and say the words together.`;
-  const questions = [
-    { q:"What is the main topic of the conversation?", options:[englishTopic,"a difficult examination","a sports result"], answer:0, explain:`Người nói giới thiệu ${englishTopic} là chủ đề chính.` },
-    { q:advanced ? "What does the speaker recommend?" : "How many things can Tom see?", options:advanced?["Set a goal, review and adapt","Avoid making a plan","Expect a perfect result immediately"]:["Two","Three","Five"], answer:advanced?0:1, explain:advanced?"Người nói khuyên nên đặt mục tiêu, xem lại kết quả rồi điều chỉnh dần.":"Tom nói rằng bạn ấy nhìn thấy ba đồ vật." },
-    { q:mid ? "Who did Ben ask for advice?" : advanced ? "Why is careful listening useful?" : "Which one does Tom like?", options:mid?["Two friends","His teacher","Nobody"]:advanced?["It reveals reasons behind opinions","It ends every disagreement","It makes decisions immediate"]:["The blue one","The red one","The big one"], answer:0, explain:mid?"Ben nói rằng bạn ấy đã hỏi ý kiến hai người bạn.":advanced?"Nghe kỹ giúp hiểu lý do phía sau các ý kiến khác nhau.":"Tom nói rằng bạn ấy thích đồ vật màu xanh." }
+  const lessonNumber = Number(lesson.id.split("-").at(-1) ?? 1);
+  const variant = (lessonNumber - 1) % 12;
+  const speakers = [
+    ["Lucy", "Tom"], ["Anna", "Ben"], ["Mia", "Jack"], ["Daisy", "Leo"], ["Emma", "Sam"], ["Grace", "Noah"],
+    ["Ruby", "Oscar"], ["Chloe", "Harry"], ["Nina", "Alex"], ["Sophie", "Daniel"], ["Lily", "Max"], ["Eva", "Ryan"],
+  ][variant];
+  const settings = [
+    "in the classroom", "at the school gate", "near the library", "in the sports hall", "at a small cafe", "on a rainy bus ride",
+    "beside a noticeboard", "in a community centre", "at the market", "in the computer room", "outside the museum", "in the art room",
   ];
-  return { transcript, questions, prompt: advanced ? `Give a 60-90 second response about ${englishTopic}. State your view, give an example, acknowledge another perspective and conclude.` : mid ? `Talk for 45 seconds about ${englishTopic}. Give your opinion and two supporting details.` : `Look at the picture and say 4-6 simple sentences about ${englishTopic}.`, target: advanced ? "Độ trôi chảy · độ đa dạng từ vựng · liên kết ý · phát âm" : mid ? "Ý rõ ràng · từ nối · phát âm" : "Từ khóa đúng · câu hoàn chỉnh · âm rõ" };
+  const actions = [
+    "choosing what to do next", "planning a short project", "checking a list of useful items", "comparing two possible activities",
+    "preparing for a class presentation", "solving a small problem", "asking for advice", "reviewing what they learned",
+    "organising a weekend plan", "making a poster", "recording a short interview", "deciding how to help a friend",
+  ];
+  const objects = ["a blue notebook", "a green ticket", "three photos", "a yellow bag", "a small map", "two sandwiches", "a red poster", "a white timetable", "a camera", "a sports shirt", "a bus card", "a new app"];
+  const details = ["because it saves time", "because it is easier to remember", "because the weather may change", "because the group needs a clear plan", "because the first idea was too expensive", "because everyone can join", "because the instructions were confusing", "because the result was more useful than expected", "because the room was different", "because they wanted more practice", "because the old plan was too slow", "because the final choice felt fair"];
+  const advice = ["make a simple checklist", "ask one more question", "compare the choices carefully", "practise for ten minutes", "write the key words first", "check the time and place", "listen before deciding", "give a clear example", "try the easiest step first", "review the answer twice", "work with a partner", "explain the reason clearly"];
+  const setting = settings[variant];
+  const action = actions[variant];
+  const object = objects[variant];
+  const reason = details[variant];
+  const recommendation = advice[variant];
+  const transcript = advanced
+    ? `Host: Today we are discussing ${englishTopic} ${setting}. Speaker: The main issue is not simply choosing quickly, but understanding why one option may work better than another. Host: What example can you give? Speaker: A group was ${action}, and they focused on ${object} ${reason}. Host: What would you recommend to learners? Speaker: I would ${recommendation}, support the idea with evidence, and then adapt the plan after receiving feedback.`
+    : mid
+    ? `${speakers[0]}: Hi ${speakers[1]}. We are talking about ${englishTopic} today. ${speakers[1]}: Yes, and we are ${action} ${setting}. ${speakers[0]}: What is the most important detail? ${speakers[1]}: I think it is ${object}, ${reason}. ${speakers[0]}: What should we do next? ${speakers[1]}: We should ${recommendation} before we finish.`
+    : `${speakers[0]}: Hello, ${speakers[1]}! Look at the picture about ${englishTopic}. ${speakers[1]}: I can see ${object} ${setting}. ${speakers[0]}: What are the children doing? ${speakers[1]}: They are ${action}. ${speakers[0]}: Why is it a good idea? ${speakers[1]}: ${reason}. Let us say the words and point to the picture.`;
+  const questions = [
+    { q:"What is the main topic of the conversation?", options:[englishTopic,"a sports result","a difficult exam rule"], answer:0, explain:`The speakers introduce ${englishTopic} as the main topic.` },
+    { q:"Where does the conversation happen?", options:[setting.replace(/^in |^at |^near |^on |^beside |^outside /, ""), "at a train station", "in a hospital"], answer:0, explain:`The transcript says the speakers are ${setting}.` },
+    { q:advanced ? "What does the speaker recommend?" : "What detail is mentioned?", options:advanced?[recommendation,"ignore the feedback","choose without checking"]:[object,"a new bicycle","a broken window"], answer:0, explain:advanced?`The speaker recommends learners should ${recommendation}.`:`The detail mentioned is ${object}.` }
+  ];
+  const prompts = [
+    `Describe a picture about ${englishTopic}. Mention the place, people and one object.`,
+    `Talk about ${englishTopic}. Say what you usually do and why it is useful.`,
+    `Compare two choices connected with ${englishTopic}. Give one reason for each choice.`,
+    `Tell a short story about ${englishTopic}. Use first, then and finally.`,
+  ];
+  return { transcript, questions, prompt: advanced ? `Give a 60-90 second response about ${englishTopic}. Refer to ${setting}, discuss ${action}, and explain whether ${recommendation} is a good strategy.` : mid ? `Talk for 45 seconds about ${englishTopic}. Mention ${object}, explain ${reason}, and add one personal opinion.` : prompts[variant % prompts.length], target: advanced ? "Độ trôi chảy · độ đa dạng từ vựng · liên kết ý · phát âm" : mid ? "Ý rõ ràng · từ nối · phát âm" : "Từ khóa đúng · câu hoàn chỉnh · âm rõ" };
 }
 
 function cleanAnswer(answer: string) {
