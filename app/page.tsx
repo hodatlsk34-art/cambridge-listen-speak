@@ -6,9 +6,9 @@ import { cambridgePracticeBank } from "./data/cambridgePracticeBank";
 const levels = [
   { id: "pre-a1", short: "Pre A1", name: "Starters", icon: "🦁", color: "yellow", age: "6–8 tuổi", listen: "Nghe từ, số và mô tả ngắn", speak: "Chào hỏi, gọi tên và trả lời đơn" },
   { id: "a1", short: "A1", name: "Movers", icon: "🐢", color: "green", age: "7–10 tuổi", listen: "Hiểu hội thoại và chỉ dẫn đơn giản", speak: "Mô tả tranh, kể chuyện rất ngắn" },
-  { id: "a2y", short: "A2", name: "Flyers", icon: "🐬", color: "blue", age: "9–12 tuổi", listen: "Nghe detail trong hội thoại quen thuộc", speak: "So sánh tranh, kể chuyện và trao đổi" },
+  { id: "a2y", short: "A2", name: "Flyers", icon: "🐬", color: "blue", age: "9–12 tuổi", listen: "Nghe chi tiết trong hội thoại quen thuộc", speak: "So sánh tranh, kể chuyện và trao đổi" },
   { id: "a2", short: "A2", name: "Key", icon: "🚀", color: "cyan", age: "Thiếu niên · người lớn", listen: "Thông tin chính trong tình huống hằng ngày", speak: "Hỏi đáp và thảo luận chủ đề quen thuộc" },
-  { id: "b1", short: "B1", name: "Preliminary", icon: "🐼", color: "purple", age: "Thiếu niên · người lớn", listen: "Nắm ý chính, thái độ và detail", speak: "Phỏng vấn, mô tả và thảo luận" },
+  { id: "b1", short: "B1", name: "Preliminary", icon: "🐼", color: "purple", age: "Thiếu niên · người lớn", listen: "Nắm ý chính, thái độ và chi tiết", speak: "Phỏng vấn, mô tả và thảo luận" },
   { id: "b2", short: "B2", name: "First", icon: "🦊", color: "coral", age: "Thiếu niên · người lớn", listen: "Hiểu nhiều người nói và quan điểm", speak: "So sánh, lập luận và tương tác tự nhiên" },
   { id: "c1", short: "C1", name: "Advanced", icon: "🦉", color: "mint", age: "Người lớn · học thuật", listen: "Theo dõi bài nói dài và hàm ý", speak: "Trình bày, thương lượng và phát triển ý" },
   { id: "c2", short: "C2", name: "Proficiency", icon: "🦅", color: "indigo", age: "Người lớn · chuyên sâu", listen: "Hiểu sắc thái, tốc độ tự nhiên", speak: "Diễn đạt chính xác, linh hoạt và tinh tế" },
@@ -54,7 +54,7 @@ const cambridgeExamFormats = [
     level: "A2",
     exam: "Flyers",
     age: "9–12 tuổi",
-    description: "Luyện nghe detail, đọc hiểu văn bản ngắn và nói thành đoạn rõ ý.",
+    description: "Luyện nghe chi tiết, đọc hiểu văn bản ngắn và nói thành đoạn rõ ý.",
     papers: [
       { name: "Nghe", time: "khoảng 25 phút", parts: 5, tasks: ["Nối tên", "Hoàn thành ghi chú", "Chọn tranh", "Hoàn thành đoạn văn", "Tô màu và viết"] },
       { name: "Đọc và Viết", time: "khoảng 40 phút", parts: 7, tasks: ["Nối định nghĩa", "Hoàn thành hội thoại", "Điền từ cho truyện", "Ngữ pháp trong đoạn văn", "Viết câu trả lời ngắn", "Viết đoạn theo gợi ý"] },
@@ -63,7 +63,7 @@ const cambridgeExamFormats = [
     practice: [
       { title: "Trao đổi thông tin", skill: "Nói", sample: "Hỏi và trả lời để hoàn thành bảng thông tin." },
       { title: "Câu hỏi văn bản ngắn", skill: "Đọc", sample: "Đọc thông báo, email hoặc truyện ngắn rồi trả lời." },
-      { title: "Hoàn thành ghi chú", skill: "Nghe", sample: "Nghe thông tin về lớp học/chuyến đi và điền detail còn thiếu." },
+      { title: "Hoàn thành ghi chú", skill: "Nghe", sample: "Nghe thông tin về lớp học/chuyến đi và điền chi tiết còn thiếu." },
     ],
   },
   {
@@ -158,6 +158,8 @@ function Wave({ active = false }: { active?: boolean }) {
 }
 
 type Lesson = (typeof lessons)[number];
+type ActiveView = "home" | "roadmap" | "exam" | "lessons" | "progress";
+
 function lessonContent(lesson: Lesson) {
   const advanced = ["B2","C1","C2"].some(x => lesson.level.startsWith(x));
   const mid = lesson.level.startsWith("B1") || lesson.level.startsWith("A2 Key");
@@ -176,6 +178,7 @@ function lessonContent(lesson: Lesson) {
 }
 
 export default function Home() {
+  const [activeView, setActiveView] = useState<ActiveView>("home");
   const [selected, setSelected] = useState("pre-a1");
   const [playing, setPlaying] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -193,6 +196,9 @@ export default function Home() {
   const [accent, setAccent] = useState<"en-GB"|"en-US">("en-GB");
   const [examLevelId, setExamLevelId] = useState("pre-a1");
   const [practiceTestId, setPracticeTestId] = useState("starters-practice-1");
+  const [doingTest, setDoingTest] = useState(false);
+  const [testAnswers, setTestAnswers] = useState<Record<string,string>>({});
+  const [testChecked, setTestChecked] = useState(false);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [recognisedText, setRecognisedText] = useState("");
   const [pronunciationScore, setPronunciationScore] = useState<number | null>(null);
@@ -202,6 +208,11 @@ export default function Home() {
   const currentExam = cambridgeExamFormats.find(exam => exam.id === examLevelId) ?? cambridgeExamFormats[0];
   const practiceTests = cambridgePracticeBank.filter(test => test.levelId === examLevelId);
   const activePracticeTest = practiceTests.find(test => test.id === practiceTestId) ?? practiceTests[0];
+  const gradableItems = activePracticeTest?.papers.flatMap(paper => paper.items.filter(item => item.answerKey !== "học viên tự trả lời")) ?? [];
+  const testScore = gradableItems.filter(item => {
+    const key = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`;
+    return testAnswers[key]?.trim().toLowerCase() === item.answerKey.trim().toLowerCase();
+  }).length;
   const filteredLessons = useMemo(() => lessons.filter(l =>
     (filter === "Tất cả" || l.type === filter) &&
     (levelFilter === "Tất cả cấp độ" || l.level === levelFilter) &&
@@ -214,6 +225,10 @@ export default function Home() {
   const detail = openLesson ? lessonContent(openLesson) : null;
   const openDetail = (lesson:Lesson) => { setOpenLesson(lesson); setShowTranscript(false); setAnswers({}); setChecked(false); setLessonAudio(false); setSpeaking(false); };
   const closeDetail = () => { window.speechSynthesis?.cancel(); if (recorderRef.current?.state === "recording") recorderRef.current.stop(); setOpenLesson(null); };
+  const startPracticeTest = () => { setDoingTest(true); setTestChecked(false); setTestAnswers({}); };
+  const closePracticeTest = () => { setDoingTest(false); setTestChecked(false); };
+  const updateTestAnswer = (key:string, value:string) => setTestAnswers(current => ({...current, [key]: value}));
+  const openView = (view:ActiveView) => { setActiveView(view); setMenu(false); window.scrollTo({top:0, behavior:"smooth"}); };
   const playLesson = () => { if (!detail) return; window.speechSynthesis.cancel(); if (lessonAudio) { setLessonAudio(false); return; } const voice = new SpeechSynthesisUtterance(detail.transcript); voice.lang=accent; voice.rate=openLesson?.level.startsWith("Pre")?.78:openLesson?.level.startsWith("A1")?.85:1; voice.onend=()=>setLessonAudio(false); setLessonAudio(true); window.speechSynthesis.speak(voice); };
   const recordSpeech = async () => {
     if (speaking && recorderRef.current) { recorderRef.current.stop(); return; }
@@ -230,22 +245,22 @@ export default function Home() {
   const downloadRecording = () => { if (!recordingUrl || !openLesson) return; const link=document.createElement("a"); link.href=recordingUrl; link.download=`speakup-${openLesson.id}.webm`; link.click(); };
 
   return (
-    <main>
+    <main id="top">
       <header className="header">
-        <a className="brand" href="#top" aria-label="SpeakUp Cambridge"><span className="brand-mark">▥</span><span>SpeakUp <b>Cambridge</b></span></a>
+        <button className="brand brand-button" onClick={()=>openView("home")} aria-label="SpeakUp Cambridge"><span className="brand-mark">▥</span><span>SpeakUp <b>Cambridge</b></span></button>
         <button className="menu-button" onClick={()=>setMenu(!menu)} aria-label="Mở menu">☰</button>
         <nav className={menu ? "open" : ""}>
-          <a href="#roadmap">🗺️ Lộ trình</a><a href="#exam-formats">📝 Dạng đề</a><a href="#lessons">📚 Kho bài học</a><a href="#practice">🎧 Luyện nghe</a><a href="#practice">🎙️ Luyện nói</a><a href="#progress">📈 Tiến độ</a>
+          <button className={activeView==="home"?"active":""} onClick={()=>openView("home")}>🏠 Trang chủ</button><button className={activeView==="roadmap"?"active":""} onClick={()=>openView("roadmap")}>🗺️ Lộ trình</button><button className={activeView==="exam"?"active":""} onClick={()=>openView("exam")}>📝 Dạng đề</button><button className={activeView==="lessons"?"active":""} onClick={()=>openView("lessons")}>📚 Kho bài học</button><button className={activeView==="progress"?"active":""} onClick={()=>openView("progress")}>📈 Tiến độ</button>
         </nav>
         <a className="hello" href="/login">👤 <span>Đăng nhập</span></a>
       </header>
 
-      <section className="hero" id="top">
+      {activeView === "home" && <section className="hero page-view" id="home">
         <div className="hero-copy">
           <div className="eyebrow">▥ CAMBRIDGE LISTENING & SPEAKING</div>
           <h1>Nghe chuẩn.<br/><em>Nói tự tin.</em><br/>Chinh phục Cambridge.</h1>
           <p>Lộ trình từ Pre A1 đến C2, tập trung luyện nghe chủ động và phản xạ nói qua bài học ngắn, hội thoại thực tế và phản hồi phát âm.</p>
-          <div className="hero-actions"><a className="button primary" href="#roadmap">✨ Kiểm tra trình độ</a><a className="button secondary" href="#roadmap">Khám phá lộ trình →</a></div>
+          <div className="hero-actions"><button className="button primary" onClick={()=>openView("roadmap")}>✨ Kiểm tra trình độ</button><button className="button secondary" onClick={()=>openView("exam")}>Khám phá dạng đề →</button></div>
           <div className="trust-row"><span>✓ Nội dung theo CEFR</span><span>✓ Trẻ em & người lớn</span><span>✓ Học 15 phút/ngày</span></div>
         </div>
         <div className="audio-lab" id="practice">
@@ -262,20 +277,20 @@ export default function Home() {
             <p>{recording ? "Đang lắng nghe... Nhấn để kết thúc" : "Nhấn micro và nói lại câu mẫu"}</p>
           </div>
         </div>
-      </section>
+      </section>}
 
-      <section className="level-rail" id="roadmap">
+      {activeView === "roadmap" && <section className="level-rail page-view" id="roadmap">
         <div className="section-heading"><div><span className="kicker">LỘ TRÌNH CAMBRIDGE</span><h2>Chọn đúng cấp độ, tiến bộ từng ngày</h2></div><p>8 chặng học từ làm quen tiếng Anh đến giao tiếp thành thạo.</p></div>
         <div className="levels">{levels.map(l=><button key={l.id} className={`level ${l.color} ${selected===l.id?"selected":""}`} onClick={()=>setSelected(l.id)}><span>{l.icon}</span><b>{l.short}</b><small>{l.name}</small></button>)}</div>
-        <div className="level-detail"><div className="detail-title"><span>{current.icon}</span><div><small>CẤP ĐỘ ĐANG CHỌN</small><h3>{current.short} {current.name}</h3><p>{current.age}</p></div></div><div><b>🎧 Mục tiêu Nghe</b><p>{current.listen}</p></div><div><b>🎙️ Mục tiêu Nói</b><p>{current.speak}</p></div><button className="button primary">Bắt đầu học →</button></div>
-      </section>
+        <div className="level-detail"><div className="detail-title"><span>{current.icon}</span><div><small>CẤP ĐỘ ĐANG CHỌN</small><h3>{current.short} {current.name}</h3><p>{current.age}</p></div></div><div><b>🎧 Mục tiêu Nghe</b><p>{current.listen}</p></div><div><b>🎙️ Mục tiêu Nói</b><p>{current.speak}</p></div><button className="button primary" onClick={()=>openView("lessons")}>Bắt đầu học →</button></div>
+      </section>}
 
-      <section className="method">
+      {activeView === "home" && <section className="method page-view">
         <span className="kicker">PHƯƠNG PHÁP TRỌNG TÂM</span><h2>Nghe chủ động – Nói phản xạ</h2><p className="section-sub">Mỗi bài học đi theo vòng luyện tập ngắn, rõ ràng và có thể lặp lại.</p>
-        <div className="method-grid"><article><span>🎧</span><b>1. Nghe lấy ý</b><p>Nghe tình huống tự nhiên để xác định người nói, bối cảnh và ý chính.</p></article><article><span>🔍</span><b>2. Nghe detail</b><p>Phát lại theo tốc độ phù hợp, hoàn thành câu hỏi và mở transcript.</p></article><article><span>🗣️</span><b>3. Nói có hướng dẫn</b><p>Shadowing từng câu, luyện trọng âm, nhịp điệu và âm cuối.</p></article><article><span>🏆</span><b>4. Nói tự do</b><p>Trả lời mở, đóng vai và nhận tiêu chí tự đánh giá theo cấp độ.</p></article></div>
-      </section>
+        <div className="method-grid"><article><span>🎧</span><b>1. Nghe lấy ý</b><p>Nghe tình huống tự nhiên để xác định người nói, bối cảnh và ý chính.</p></article><article><span>🔍</span><b>2. Nghe chi tiết</b><p>Phát lại theo tốc độ phù hợp, hoàn thành câu hỏi và mở transcript.</p></article><article><span>🗣️</span><b>3. Nói có hướng dẫn</b><p>Shadowing từng câu, luyện trọng âm, nhịp điệu và âm cuối.</p></article><article><span>🏆</span><b>4. Nói tự do</b><p>Trả lời mở, đóng vai và nhận tiêu chí tự đánh giá theo cấp độ.</p></article></div>
+      </section>}
 
-      <section className="exam-section" id="exam-formats">
+      {activeView === "exam" && <section className="exam-section page-view" id="exam-formats">
         <div className="section-heading">
           <div>
             <span className="kicker">DẠNG ĐỀ THI CAMBRIDGE</span>
@@ -319,9 +334,12 @@ export default function Home() {
               <h3>{activePracticeTest.title}</h3>
               <p>{activePracticeTest.level} {activePracticeTest.exam} · Chủ đề: {activePracticeTest.theme}</p>
             </div>
-            <select value={activePracticeTest.id} onChange={e=>setPracticeTestId(e.target.value)} aria-label="Chọn đề luyện tập">
-              {practiceTests.map(test => <option key={test.id} value={test.id}>{test.title} · {test.theme}</option>)}
-            </select>
+            <div className="test-bank-actions">
+              <select value={activePracticeTest.id} onChange={e=>setPracticeTestId(e.target.value)} aria-label="Chọn đề luyện tập">
+                {practiceTests.map(test => <option key={test.id} value={test.id}>{test.title} · {test.theme}</option>)}
+              </select>
+              <button className="button primary" type="button" onClick={startPracticeTest}>Làm bài →</button>
+            </div>
           </div>
           <div className="test-paper-list">
             {activePracticeTest.papers.map(paper => <article key={paper.paper} className="test-paper">
@@ -340,19 +358,21 @@ export default function Home() {
             </article>)}
           </div>
         </div>}
-      </section>
+      </section>}
 
-      <section className="lesson-section" id="lessons">
+      {activeView === "lessons" && <section className="lesson-section page-view" id="lessons">
         <div className="section-heading"><div><span className="kicker">KHO 280 BÀI HỌC</span><h2>Học theo tình huống thực tế</h2><p className="catalog-summary">35 bài cho mỗi chặng · Tập trung Nghe và Nói · Từ Pre A1 đến C2</p></div><div className="filters">{["Tất cả","Trẻ em","Thiếu niên","Người lớn"].map(f=><button key={f} className={filter===f?"active":""} onClick={()=>changeFilter(f,"type")}>{f}</button>)}</div></div>
         <div className="catalog-tools"><label className="search-box">⌕ <input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Tìm chủ đề, dạng bài..." /></label><select value={levelFilter} onChange={e=>changeFilter(e.target.value,"level")}><option>Tất cả cấp độ</option>{levelCatalog.map(l=><option key={l[0]}>{l[0]}</option>)}</select><span><b>{filteredLessons.length}</b> bài phù hợp</span></div>
         <div className="lesson-grid">{visibleLessons.map(l=><article key={l.id} onClick={()=>openDetail(l)}><div className="lesson-visual"><span>{l.icon}</span><button aria-label={`Mở ${l.title}`}>▶</button><i>{l.skill}</i></div><div className="lesson-body"><div className="lesson-tags"><span className="pill blue">{l.level}</span><span>{l.exam}</span></div><h3>{l.title}</h3><p>{l.topic}</p><div className="format">🎯 {l.format}</div><footer><span>🎧 + 🎙️</span><span>⏱ {l.time}</span></footer></div></article>)}</div>
         {visibleLessons.length === 0 && <div className="empty-state">Không tìm thấy bài phù hợp. Hãy thử từ khóa hoặc bộ lọc khác.</div>}
         <div className="pagination"><button disabled={page===1} onClick={()=>setPage(p=>p-1)}>← Trước</button><span>Trang <b>{page}</b> / {totalPages}</span><button disabled={page===totalPages} onClick={()=>setPage(p=>p+1)}>Sau →</button></div>
-      </section>
+      </section>}
 
-      <section className="progress-section" id="progress"><div><span className="kicker light">TIẾN BỘ MỖI NGÀY</span><h2>Biết mình đang ở đâu<br/>và cần luyện gì tiếp theo.</h2><p>Theo dõi số phút nghe, lượt nói, từ vựng đã học và mức độ hoàn thành từng kỹ năng.</p><a className="button white" href="#top">Bắt đầu lộ trình miễn phí →</a></div><div className="dashboard"><div className="streak">🔥 <b>7 ngày</b><small>Chuỗi học liên tục</small></div><div className="stats"><span><b>84</b><small>phút nghe</small></span><span><b>36</b><small>lượt nói</small></span><span><b>12</b><small>bài hoàn thành</small></span></div><div className="bars"><p>Nghe <span>72%</span></p><i><b style={{width:"72%"}}/></i><p>Nói <span>58%</span></p><i><b style={{width:"58%"}}/></i></div></div></section>
+      {activeView === "progress" && <section className="progress-section page-view" id="progress"><div><span className="kicker light">TIẾN BỘ MỖI NGÀY</span><h2>Biết mình đang ở đâu<br/>và cần luyện gì tiếp theo.</h2><p>Theo dõi số phút nghe, lượt nói, từ vựng đã học và mức độ hoàn thành từng kỹ năng.</p><button className="button white" onClick={()=>openView("roadmap")}>Bắt đầu lộ trình miễn phí →</button></div><div className="dashboard"><div className="streak">🔥 <b>7 ngày</b><small>Chuỗi học liên tục</small></div><div className="stats"><span><b>84</b><small>phút nghe</small></span><span><b>36</b><small>lượt nói</small></span><span><b>12</b><small>bài hoàn thành</small></span></div><div className="bars"><p>Nghe <span>72%</span></p><i><b style={{width:"72%"}}/></i><p>Nói <span>58%</span></p><i><b style={{width:"58%"}}/></i></div></div></section>}
 
+      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Nhập câu trả lời, sau đó bấm chấm bài để xem kết quả tự động cho các câu có đáp án cố định.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div><p>{item.instruction}</p><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Viết câu trả lời để giáo viên hoặc học viên tự chấm theo tiêu chí." : "Nhập đáp án của bạn..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Đúng" : `Chưa đúng. Đáp án/gợi ý: ${item.answerKey}`}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">Câu này cần tự chấm theo trọng tâm: {item.skillFocus}.</p>}</article>; })}</section>)}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Chấm bài</button>{testChecked && <strong>Kết quả tự động: {testScore}/{gradableItems.length} câu có đáp án cố định</strong>}</footer></div></div>}
       {openLesson && detail && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closeDetail}/><div className="lesson-panel"><button className="close" onClick={closeDetail}>×</button><header><span className="lesson-icon">{openLesson.icon}</span><div><span className="pill blue">{openLesson.level} · {openLesson.exam}</span><h2>{openLesson.title}</h2><p>{openLesson.topic} · {openLesson.time}</p></div></header><div className="lesson-tabs"><span>1. Nghe hiểu</span><span>2. Kiểm tra</span><span>3. Luyện nói</span></div><section className="listen-block"><h3>🎧 Bài nghe</h3><div className="accent-picker"><b>Chọn giọng đọc:</b><button className={accent==="en-GB"?"selected":""} onClick={()=>setAccent("en-GB")}>🇬🇧 Anh–Anh</button><button className={accent==="en-US"?"selected":""} onClick={()=>setAccent("en-US")}>🇺🇸 Anh–Mỹ</button></div><div className="audio-player"><button onClick={playLesson}>{lessonAudio?"Ⅱ":"▶"}</button><Wave active={lessonAudio}/><span>{lessonAudio?"Đang phát...":accent==="en-GB"?"Giọng Anh–Anh · 1×":"Giọng Anh–Mỹ · 1×"}</span></div><button className="transcript-toggle" onClick={()=>setShowTranscript(!showTranscript)}>{showTranscript?"Ẩn transcript":"Hiện transcript sau khi nghe"}</button>{showTranscript&&<div className="transcript">{detail.transcript}</div>}</section><section><h3>✅ Câu hỏi nghe hiểu</h3><div className="quiz">{detail.questions.map((q,i)=><article key={q.q}><b>{i+1}. {q.q}</b>{q.options.map((o,j)=><label key={o} className={checked?(j===q.answer?"correct":answers[i]===j?"wrong":""):""}><input type="radio" name={`q${i}`} checked={answers[i]===j} onChange={()=>setAnswers(a=>({...a,[i]:j}))}/>{o}</label>)}{checked&&<p>💡 {q.explain}</p>}</article>)}</div><button className="button primary" onClick={()=>setChecked(true)}>Chấm bài ({Object.keys(answers).length}/3)</button>{checked&&<strong className="score">Kết quả: {detail.questions.filter((q,i)=>answers[i]===q.answer).length}/3 câu đúng</strong>}</section><section className="speaking-practice"><h3>🎙️ Luyện nói & tự chấm</h3><p>{detail.prompt}</p><div className="target">Tiêu chí: {detail.target}</div><button className={`record-button ${speaking?"active":""}`} onClick={recordSpeech}>🎙️ <b>{speaking?"Dừng và lưu bản ghi":"Bắt đầu nói"}</b><small>{speaking?"Đang ghi âm – nhấn để hoàn thành":"Cho phép micro để ghi âm"}</small></button>{speaking&&<Wave active/>}{recordingUrl&&<div className="recording-result"><audio controls src={recordingUrl}/><button onClick={downloadRecording}>⇩ Tải tệp ghi âm</button></div>}{recognisedText&&<div className="ai-feedback"><b>Nhận diện giọng nói: {pronunciationScore}%</b><p>Hệ thống nghe được: “{recognisedText}”</p><small>Điểm dựa trên mức độ nhận diện câu nói; hãy nghe lại bản ghi để tự điều chỉnh âm, nhịp và trọng âm.</small></div>}<p className="privacy-note">Tệp ghi âm chỉ được giữ trong trình duyệt và có thể tải về máy; không tự động tải lên máy chủ.</p></section></div></div>}
+      <a className="back-to-top" href="#top" aria-label="Về đầu trang">↑</a>
       <footer className="footer"><div className="brand"><span className="brand-mark">▥</span><span>SpeakUp <b>Cambridge</b></span></div><p>Nền tảng luyện Nghe – Nói theo lộ trình Cambridge và CEFR.</p><span>Nội dung tham khảo cấu trúc Cambridge English; không phải website chính thức của Cambridge.</span></footer>
     </main>
   );
