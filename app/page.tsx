@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { cambridgePracticeBank } from "./data/cambridgePracticeBank";
+import { cambridgePracticeBank, type CambridgePracticeItem, type CambridgePracticeTest } from "./data/cambridgePracticeBank";
 
 const levels = [
   { id: "pre-a1", short: "Pre A1", name: "Starters", icon: "🦁", color: "yellow", age: "6–8 tuổi", listen: "Nghe từ, số và mô tả ngắn", speak: "Chào hỏi, gọi tên và trả lời đơn" },
@@ -177,6 +177,26 @@ function lessonContent(lesson: Lesson) {
   return { transcript, questions, prompt: advanced ? `Give a 60-90 second response about ${englishTopic}. State your view, give an example, acknowledge another perspective and conclude.` : mid ? `Talk for 45 seconds about ${englishTopic}. Give your opinion and two supporting details.` : `Look at the picture and say 4-6 simple sentences about ${englishTopic}.`, target: advanced ? "Độ trôi chảy · độ đa dạng từ vựng · liên kết ý · phát âm" : mid ? "Ý rõ ràng · từ nối · phát âm" : "Từ khóa đúng · câu hoàn chỉnh · âm rõ" };
 }
 
+function testMaterial(test: CambridgePracticeTest, paperName: string, item: CambridgePracticeItem) {
+  const theme = test.theme.toLowerCase();
+  if (paperName.includes("Nghe")) {
+    return {
+      label: "Nội dung nghe",
+      text: `Speaker 1: Today we are talking about ${theme}. Please listen carefully. Speaker 2: First, look at ${item.part}. ${item.instruction} Speaker 1: Here is the important information. ${item.sampleQuestion} The answer you need is: ${item.answerKey}. Listen again and check the details before you write your answer.`,
+    };
+  }
+  if (paperName.includes("Đọc") || paperName.includes("Viết") || paperName.includes("Sử dụng")) {
+    return {
+      label: "Nội dung đề",
+      text: `Read this text about ${theme}. Last week, a group of students joined an activity connected with this topic. They had to make a plan, ask for information, and choose the best option. Some students wanted something simple and familiar, while others preferred a new challenge. In the end, they agreed that careful preparation helped them enjoy the activity more. Use this text, the notice, or the short message to answer the question below.`,
+    };
+  }
+  return {
+    label: "Thẻ nói / gợi ý",
+    text: `Candidate card: Talk about ${theme}. Say what you can see or imagine, give one reason, and ask or answer a follow-up question. Try to speak clearly and use complete sentences.`,
+  };
+}
+
 export default function Home() {
   const [activeView, setActiveView] = useState<ActiveView>("home");
   const [selected, setSelected] = useState("pre-a1");
@@ -199,6 +219,7 @@ export default function Home() {
   const [doingTest, setDoingTest] = useState(false);
   const [testAnswers, setTestAnswers] = useState<Record<string,string>>({});
   const [testChecked, setTestChecked] = useState(false);
+  const [testAudioKey, setTestAudioKey] = useState<string | null>(null);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [recognisedText, setRecognisedText] = useState("");
   const [pronunciationScore, setPronunciationScore] = useState<number | null>(null);
@@ -229,6 +250,16 @@ export default function Home() {
   const closePracticeTest = () => { setDoingTest(false); setTestChecked(false); };
   const updateTestAnswer = (key:string, value:string) => setTestAnswers(current => ({...current, [key]: value}));
   const openView = (view:ActiveView) => { setActiveView(view); setMenu(false); window.scrollTo({top:0, behavior:"smooth"}); };
+  const playTestAudio = (key:string, text:string) => {
+    window.speechSynthesis.cancel();
+    if (testAudioKey === key) { setTestAudioKey(null); return; }
+    const voice = new SpeechSynthesisUtterance(text);
+    voice.lang = "en-GB";
+    voice.rate = activePracticeTest?.levelId === "pre-a1" || activePracticeTest?.levelId === "a1" ? .78 : .92;
+    voice.onend = () => setTestAudioKey(null);
+    setTestAudioKey(key);
+    window.speechSynthesis.speak(voice);
+  };
   const playLesson = () => { if (!detail) return; window.speechSynthesis.cancel(); if (lessonAudio) { setLessonAudio(false); return; } const voice = new SpeechSynthesisUtterance(detail.transcript); voice.lang=accent; voice.rate=openLesson?.level.startsWith("Pre")?.78:openLesson?.level.startsWith("A1")?.85:1; voice.onend=()=>setLessonAudio(false); setLessonAudio(true); window.speechSynthesis.speak(voice); };
   const recordSpeech = async () => {
     if (speaking && recorderRef.current) { recorderRef.current.stop(); return; }
@@ -345,15 +376,16 @@ export default function Home() {
             {activePracticeTest.papers.map(paper => <article key={paper.paper} className="test-paper">
               <header><b>{paper.paper}</b><span>{paper.time}</span></header>
               <div className="test-items">
-                {paper.items.map(item => <section key={`${paper.paper}-${item.part}`}>
+                {paper.items.map(item => { const material = testMaterial(activePracticeTest, paper.paper, item); const audioKey = `${activePracticeTest.id}-${paper.paper}-${item.part}`; return <section key={`${paper.paper}-${item.part}`}>
                   <div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div>
                   <p>{item.instruction}</p>
+                  <div className="test-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(audioKey, material.text)}>{testAudioKey===audioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div>
                   <ul>
-                    <li><b>Câu mẫu:</b> {item.sampleQuestion}</li>
+                    <li><b>Câu hỏi:</b> {item.sampleQuestion}</li>
                     <li><b>Đáp án/gợi ý:</b> {item.answerKey}</li>
                     <li><b>Trọng tâm:</b> {item.skillFocus}</li>
                   </ul>
-                </section>)}
+                </section>; })}
               </div>
             </article>)}
           </div>
@@ -370,7 +402,7 @@ export default function Home() {
 
       {activeView === "progress" && <section className="progress-section page-view" id="progress"><div><span className="kicker light">TIẾN BỘ MỖI NGÀY</span><h2>Biết mình đang ở đâu<br/>và cần luyện gì tiếp theo.</h2><p>Theo dõi số phút nghe, lượt nói, từ vựng đã học và mức độ hoàn thành từng kỹ năng.</p><button className="button white" onClick={()=>openView("roadmap")}>Bắt đầu lộ trình miễn phí →</button></div><div className="dashboard"><div className="streak">🔥 <b>7 ngày</b><small>Chuỗi học liên tục</small></div><div className="stats"><span><b>84</b><small>phút nghe</small></span><span><b>36</b><small>lượt nói</small></span><span><b>12</b><small>bài hoàn thành</small></span></div><div className="bars"><p>Nghe <span>72%</span></p><i><b style={{width:"72%"}}/></i><p>Nói <span>58%</span></p><i><b style={{width:"58%"}}/></i></div></div></section>}
 
-      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Nhập câu trả lời, sau đó bấm chấm bài để xem kết quả tự động cho các câu có đáp án cố định.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div><p>{item.instruction}</p><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Viết câu trả lời để giáo viên hoặc học viên tự chấm theo tiêu chí." : "Nhập đáp án của bạn..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Đúng" : `Chưa đúng. Đáp án/gợi ý: ${item.answerKey}`}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">Câu này cần tự chấm theo trọng tâm: {item.skillFocus}.</p>}</article>; })}</section>)}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Chấm bài</button>{testChecked && <strong>Kết quả tự động: {testScore}/{gradableItems.length} câu có đáp án cố định</strong>}</footer></div></div>}
+      {doingTest && activePracticeTest && <div className="exam-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closePracticeTest}/><div className="exam-panel"><button className="close" onClick={closePracticeTest}>×</button><header><span className="pill blue">{activePracticeTest.level} · {activePracticeTest.exam}</span><h2>{activePracticeTest.title}</h2><p>Chủ đề: {activePracticeTest.theme}. Mỗi phần có nội dung đề, câu hỏi và ô trả lời. Phần nghe có nút phát audio bằng giọng đọc trình duyệt.</p></header><div className="exam-work-list">{activePracticeTest.papers.map(paper => <section key={paper.paper} className="exam-work-paper"><div className="exam-work-head"><h3>{paper.paper}</h3><span>{paper.time}</span></div>{paper.items.map(item => { const answerKey = `${activePracticeTest.id}-${item.part}-${item.sampleQuestion}`; const audioKey = `${activePracticeTest.id}-work-${paper.paper}-${item.part}`; const material = testMaterial(activePracticeTest, paper.paper, item); const userAnswer = testAnswers[answerKey] ?? ""; const isSelfMarked = item.answerKey === "học viên tự trả lời"; const isCorrect = userAnswer.trim().toLowerCase() === item.answerKey.trim().toLowerCase(); return <article key={answerKey} className="exam-work-item"><div><strong>{item.part.replace("Part", "Phần")}</strong><em>{item.taskType}</em></div><p>{item.instruction}</p><div className="test-material"><b>{material.label}</b><p>{material.text}</p>{paper.paper.includes("Nghe") && <button type="button" onClick={()=>playTestAudio(audioKey, material.text)}>{testAudioKey===audioKey ? "Dừng audio" : "▶ Nghe audio"}</button>}</div><label><span>{item.sampleQuestion}</span><textarea value={userAnswer} onChange={event=>updateTestAnswer(answerKey, event.target.value)} placeholder={isSelfMarked ? "Viết câu trả lời để giáo viên hoặc học viên tự chấm theo tiêu chí." : "Nhập đáp án của bạn..."} /></label>{testChecked && !isSelfMarked && <p className={`answer-feedback ${isCorrect ? "correct" : "wrong"}`}>{isCorrect ? "Đúng" : `Chưa đúng. Đáp án/gợi ý: ${item.answerKey}`}</p>}{testChecked && isSelfMarked && <p className="answer-feedback self">Câu này cần tự chấm theo trọng tâm: {item.skillFocus}.</p>}</article>; })}</section>)}</div><footer className="exam-submit"><button className="button primary" type="button" onClick={()=>setTestChecked(true)}>Chấm bài</button>{testChecked && <strong>Kết quả tự động: {testScore}/{gradableItems.length} câu có đáp án cố định</strong>}</footer></div></div>}
       {openLesson && detail && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={closeDetail}/><div className="lesson-panel"><button className="close" onClick={closeDetail}>×</button><header><span className="lesson-icon">{openLesson.icon}</span><div><span className="pill blue">{openLesson.level} · {openLesson.exam}</span><h2>{openLesson.title}</h2><p>{openLesson.topic} · {openLesson.time}</p></div></header><div className="lesson-tabs"><span>1. Nghe hiểu</span><span>2. Kiểm tra</span><span>3. Luyện nói</span></div><section className="listen-block"><h3>🎧 Bài nghe</h3><div className="accent-picker"><b>Chọn giọng đọc:</b><button className={accent==="en-GB"?"selected":""} onClick={()=>setAccent("en-GB")}>🇬🇧 Anh–Anh</button><button className={accent==="en-US"?"selected":""} onClick={()=>setAccent("en-US")}>🇺🇸 Anh–Mỹ</button></div><div className="audio-player"><button onClick={playLesson}>{lessonAudio?"Ⅱ":"▶"}</button><Wave active={lessonAudio}/><span>{lessonAudio?"Đang phát...":accent==="en-GB"?"Giọng Anh–Anh · 1×":"Giọng Anh–Mỹ · 1×"}</span></div><button className="transcript-toggle" onClick={()=>setShowTranscript(!showTranscript)}>{showTranscript?"Ẩn transcript":"Hiện transcript sau khi nghe"}</button>{showTranscript&&<div className="transcript">{detail.transcript}</div>}</section><section><h3>✅ Câu hỏi nghe hiểu</h3><div className="quiz">{detail.questions.map((q,i)=><article key={q.q}><b>{i+1}. {q.q}</b>{q.options.map((o,j)=><label key={o} className={checked?(j===q.answer?"correct":answers[i]===j?"wrong":""):""}><input type="radio" name={`q${i}`} checked={answers[i]===j} onChange={()=>setAnswers(a=>({...a,[i]:j}))}/>{o}</label>)}{checked&&<p>💡 {q.explain}</p>}</article>)}</div><button className="button primary" onClick={()=>setChecked(true)}>Chấm bài ({Object.keys(answers).length}/3)</button>{checked&&<strong className="score">Kết quả: {detail.questions.filter((q,i)=>answers[i]===q.answer).length}/3 câu đúng</strong>}</section><section className="speaking-practice"><h3>🎙️ Luyện nói & tự chấm</h3><p>{detail.prompt}</p><div className="target">Tiêu chí: {detail.target}</div><button className={`record-button ${speaking?"active":""}`} onClick={recordSpeech}>🎙️ <b>{speaking?"Dừng và lưu bản ghi":"Bắt đầu nói"}</b><small>{speaking?"Đang ghi âm – nhấn để hoàn thành":"Cho phép micro để ghi âm"}</small></button>{speaking&&<Wave active/>}{recordingUrl&&<div className="recording-result"><audio controls src={recordingUrl}/><button onClick={downloadRecording}>⇩ Tải tệp ghi âm</button></div>}{recognisedText&&<div className="ai-feedback"><b>Nhận diện giọng nói: {pronunciationScore}%</b><p>Hệ thống nghe được: “{recognisedText}”</p><small>Điểm dựa trên mức độ nhận diện câu nói; hãy nghe lại bản ghi để tự điều chỉnh âm, nhịp và trọng âm.</small></div>}<p className="privacy-note">Tệp ghi âm chỉ được giữ trong trình duyệt và có thể tải về máy; không tự động tải lên máy chủ.</p></section></div></div>}
       <a className="back-to-top" href="#top" aria-label="Về đầu trang">↑</a>
       <footer className="footer"><div className="brand"><span className="brand-mark">▥</span><span>SpeakUp <b>Cambridge</b></span></div><p>Nền tảng luyện Nghe – Nói theo lộ trình Cambridge và CEFR.</p><span>Nội dung tham khảo cấu trúc Cambridge English; không phải website chính thức của Cambridge.</span></footer>
