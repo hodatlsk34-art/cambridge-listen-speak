@@ -22,6 +22,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   if (!(await allowed(request))) return Response.json({ error: "Không có quyền." }, { status: 403 });
+  await ensureSchema();
   const { env } = await import("cloudflare:workers");
   const b=await request.json() as {id?:string;active?:boolean;password?:string;parentConsent?:boolean};
   if(!b.id)return Response.json({error:"Thiếu tài khoản."},{status:400});
