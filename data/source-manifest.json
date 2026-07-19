@@ -1,0 +1,59 @@
+{
+  "updated": "2026-07-19",
+  "purpose": "Nguon hoi thoai chuan de dua vao pipeline luyen nghe noi, uu tien nguon co license mo va phu hop noi dung doi song.",
+  "recommended": [
+    {
+      "id": "taskmaster",
+      "name": "Google Taskmaster",
+      "url": "https://huggingface.co/datasets/GEM/Taskmaster",
+      "license": "CC BY 4.0",
+      "use": "Task-oriented daily service dialogues: restaurants, movies, transport, appointments, ordering and planning.",
+      "commercialOk": true
+    },
+    {
+      "id": "multiwoz",
+      "name": "MultiWOZ",
+      "url": "https://www.repository.cam.ac.uk/handle/1810/280608",
+      "license": "CC BY 4.0",
+      "use": "Human-human task dialogues around restaurant, hotel, attraction, taxi, train and services.",
+      "commercialOk": true
+    },
+    {
+      "id": "schema-guided-dialogue",
+      "name": "Schema-Guided Dialogue",
+      "url": "https://github.com/google-research-datasets/dstc8-schema-guided-dialogue",
+      "license": "CC BY-SA 4.0",
+      "use": "Large multi-domain assistant conversations: travel, events, payments, media, restaurants and weather.",
+      "commercialOk": true
+    },
+    {
+      "id": "dral",
+      "name": "DRAL Corpus",
+      "url": "https://www.cs.utep.edu/nigel/dral/",
+      "license": "CC0",
+      "use": "Short bilingual spoken dialogue fragments.",
+      "commercialOk": true
+    }
+  ],
+  "conditional": [
+    {
+      "id": "dailydialog",
+      "name": "DailyDialog",
+      "url": "https://huggingface.co/datasets/roskoN/dailydialog",
+      "license": "CC BY-NC-SA 4.0",
+      "commercialOk": false
+    }
+  ],
+  "referenceOnly": [
+    {
+      "id": "bbc-learning-english",
+      "name": "BBC Learning English",
+      "notes": "Khong copy transcript/audio nguyen van neu chua co quyen."
+    },
+    {
+      "id": "esl-fast",
+      "name": "ESL Fast",
+      "notes": "Khong scrape/copy nguyen van neu chua co quyen."
+    }
+  ]
+}
