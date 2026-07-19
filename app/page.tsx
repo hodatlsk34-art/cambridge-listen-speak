@@ -137,7 +137,25 @@ const lessonVariants = [
     focus: "connect the topic to a real-life plan or opinion",
     viFocus: "liên hệ chủ đề với kế hoạch hoặc quan điểm trong đời sống",
   },
+  {
+    id: "role-play",
+    label: "Đóng vai tự nhiên",
+    focus: "respond naturally in a role-play conversation",
+    viFocus: "phản hồi tự nhiên trong hội thoại đóng vai",
+  },
+  {
+    id: "fluency",
+    label: "Nói trôi chảy",
+    focus: "extend the conversation with reasons and a short summary",
+    viFocus: "mở rộng hội thoại bằng lý do và tóm tắt ngắn",
+  },
 ] as const;
+
+type DialogueLine = {
+  speaker: "female" | "male";
+  en: string;
+  vi: string;
+};
 
 function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLabel: string, variant: (typeof lessonVariants)[number], seedIndex: number) {
   const [titleEn, titleVi, phraseEn, phraseVi] = seed;
@@ -235,12 +253,25 @@ function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLa
         move: ["change one detail and keep speaking", "đổi một chi tiết và tiếp tục nói"],
         close: ["That keeps the conversation moving.", "Điều đó giúp cuộc hội thoại tiếp tục tự nhiên."],
       }
-      : {
+      : variant.id === "real-life"
+        ? {
         aim: ["use the topic in a real-life plan", "dùng chủ đề trong một kế hoạch đời sống thật"],
         move: ["choose a practical next step", "chọn một bước tiếp theo thực tế"],
         close: ["That makes the plan useful in real life.", "Điều đó làm kế hoạch hữu ích trong đời sống thật."],
-      };
-  const variantOffset = variant.id === "core" ? 0 : variant.id === "reflex" ? 2 : 4;
+        }
+        : variant.id === "role-play"
+          ? {
+            aim: ["respond naturally in the role-play", "phản hồi tự nhiên trong tình huống đóng vai"],
+            move: ["listen, respond, and keep the role-play natural", "lắng nghe, phản hồi và giữ hội thoại tự nhiên"],
+            close: ["That sounds like a real conversation.", "Cách nói đó giống một cuộc trò chuyện thật."],
+          }
+          : {
+            aim: ["speak more fluently with a reason and a short summary", "nói trôi chảy hơn với lý do và tóm tắt ngắn"],
+            move: ["add a reason, a detail, and a short ending", "thêm một lý do, một chi tiết và phần kết ngắn"],
+            close: ["That makes the answer fluent and complete.", "Điều đó làm câu trả lời trôi chảy và đầy đủ."],
+          };
+  const variantOffsets = { core: 0, reflex: 2, "real-life": 4, "role-play": 6, fluency: 8 } as const;
+  const variantOffset = variantOffsets[variant.id];
   const optionA = variantOffset % 3 === 0 ? scenario.actionA : variantOffset % 3 === 1 ? scenario.actionB : scenario.object;
   const optionB = variantOffset % 2 === 0 ? scenario.actionB : scenario.result;
   const stageScripts: Record<FluencyStageId, [string, string][]> = {
@@ -309,7 +340,15 @@ function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLa
     ],
   };
   const lines = stageScripts[band.stageId];
-  return lines.slice(0, levelBands[bandIndex].turns);
+  return lines.slice(0, levelBands[bandIndex].turns).map(([en, vi], index) => {
+    const cleanEn = en.replace(/^[^:]+:\s*/, "");
+    const cleanVi = vi.replace(/^[^:]+:\s*/, "");
+    return {
+      speaker: index % 2 === 0 ? "female" : "male",
+      en: cleanEn,
+      vi: cleanVi,
+    } satisfies DialogueLine;
+  });
 }
 
 const topics = levelBands.flatMap((band, bandIndex) =>
@@ -337,13 +376,13 @@ function Wave({ active = false }: { active?: boolean }) {
 }
 
 function buildTranscript(topic: Topic) {
-  return topic.lines.map(([english]) => english).join(" ");
+  return topic.lines.map((line) => line.en).join(" ");
 }
 
 function speakingDrills(topic: Topic) {
   return [
-    { en: topic.lines[0][0], vi: topic.lines[0][1], action: "Nghe và nói lại đúng nhịp." },
-    { en: topic.lines[1][0], vi: topic.lines[1][1], action: "Đổi thông tin thành câu của bạn." },
+    { en: topic.lines[0].en, vi: topic.lines[0].vi, action: "Nghe và nói lại đúng nhịp." },
+    { en: topic.lines[1].en, vi: topic.lines[1].vi, action: "Đổi thông tin thành câu của bạn." },
     { en: `In my life, ${topic.en.toLowerCase()} is important because I use English to explain real situations.`, vi: `Trong cuộc sống của tôi, ${topic.vi.toLowerCase()} quan trọng vì tôi dùng tiếng Anh để giải thích tình huống thật.`, action: "Nói câu mở rộng 1-2 lần, sau đó ghi âm." },
   ];
 }
@@ -351,9 +390,17 @@ function speakingDrills(topic: Topic) {
 function topicQuestions(topic: Topic) {
   return [
     { q: "What is the main topic?", vi: "Chủ đề chính là gì?", answer: topic.en },
-    { q: "Say one useful sentence from the dialogue.", vi: "Hãy nói một câu hữu ích trong hội thoại.", answer: topic.lines[0][0] },
+    { q: "Say one useful sentence from the dialogue.", vi: "Hãy nói một câu hữu ích trong hội thoại.", answer: topic.lines[0].en },
     { q: "How can you use this topic in real life?", vi: "Bạn có thể dùng chủ đề này trong đời sống như thế nào?", answer: topic.speakTask },
   ];
+}
+
+function pickVoice(voices: SpeechSynthesisVoice[], speaker: DialogueLine["speaker"]) {
+  const englishVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("en"));
+  const femaleVoice = englishVoices.find((voice) => /female|samantha|victoria|zira|susan|karen|moira|serena|tessa/i.test(voice.name));
+  const maleVoice = englishVoices.find((voice) => /male|daniel|david|mark|alex|george|fred|tom/i.test(voice.name));
+  if (speaker === "female") return femaleVoice ?? englishVoices[0] ?? voices[0] ?? null;
+  return maleVoice ?? englishVoices.find((voice) => voice !== femaleVoice) ?? englishVoices[0] ?? voices[0] ?? null;
 }
 
 export default function Home() {
@@ -384,12 +431,25 @@ export default function Home() {
       setPlaying(false);
       return;
     }
-    const voice = new SpeechSynthesisUtterance(buildTranscript(topic));
-    voice.lang = "en-GB";
-    voice.rate = topic.level.startsWith("A0") || topic.level.startsWith("A1") ? 0.78 : 0.92;
-    voice.onend = () => setPlaying(false);
+    const voices = window.speechSynthesis.getVoices();
+    const rate = topic.level.startsWith("A0") || topic.level.startsWith("A1") ? 0.78 : 0.92;
+    const speakLine = (index: number) => {
+      if (index >= topic.lines.length) {
+        setPlaying(false);
+        return;
+      }
+      const line = topic.lines[index];
+      const utterance = new SpeechSynthesisUtterance(line.en);
+      utterance.lang = "en-GB";
+      utterance.rate = rate;
+      utterance.pitch = line.speaker === "female" ? 1.08 : 0.88;
+      utterance.voice = pickVoice(voices, line.speaker);
+      utterance.onend = () => window.setTimeout(() => speakLine(index + 1), 180);
+      utterance.onerror = () => setPlaying(false);
+      window.speechSynthesis.speak(utterance);
+    };
     setPlaying(true);
-    window.speechSynthesis.speak(voice);
+    speakLine(0);
   };
 
   const recordSpeech = async () => {
@@ -443,7 +503,7 @@ export default function Home() {
           <div className="audio-lab compact-lab"><div className="audio-card"><div className="card-top"><div><span className="pill yellow">{selectedStage.label} · {selectedStage.vi} · {selectedStage.level}</span><h2>{selectedStage.promise}</h2></div><span className="big-emoji">{selectedStage.icon}</span></div><Wave active={playing}/><div className="player"><button onClick={() => filteredTopics[0] && playTopic(filteredTopics[0])}>{playing ? "Ⅱ" : "▶"}</button><div><b>Nghe mẫu hội thoại thật</b><small>Nghe tiếng Anh trước, mở dịch Việt sau, rồi nói lại.</small></div><span>listen · repeat · speak</span></div></div></div>
         </div>}
 
-        {activeView === "roadmap" && <div className="level-rail app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH HỌC ĐƠN GIẢN - HIỆU QUẢ</span><h2>Đi từ Beginner đến thông hiểu - thành thạo</h2></div><p>Dữ liệu hiện dùng 60 chủ đề đời sống, 7 cấp năng lực và 3 biến thể luyện tập cho mỗi chủ đề.</p></div><div className="roadmap-stats"><span><b>1.260</b><small>bài nghe - nói</small></span><span><b>60</b><small>chủ đề đời sống</small></span><span><b>7</b><small>cấp năng lực</small></span><span><b>3</b><small>biến thể mỗi chủ đề</small></span></div><div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Học mỗi ngày: {stage.daily}</div><footer><span>Đầu ra</span><span>{stage.output}</span></footer></div></article>)}</div><div className="roadmap-support"><article><h3>Chu trình 1 bài học</h3><ol>{studyCycle.map((item) => <li key={item}>{item}</li>)}</ol></article><article><h3>Khi nào lên cấp?</h3><ol>{levelUpChecks.map((item) => <li key={item}>{item}</li>)}</ol></article><article className="source-guide"><h3>Nguồn chuẩn dùng để thiết kế lại</h3><ol>{sourceGuides.map((item) => <li key={item}>{item}</li>)}</ol></article></div></div>}
+        {activeView === "roadmap" && <div className="level-rail app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH HỌC ĐƠN GIẢN - HIỆU QUẢ</span><h2>Đi từ Beginner đến thông hiểu - thành thạo</h2></div><p>Dữ liệu hiện dùng 60 chủ đề đời sống, 7 cấp năng lực và 5 biến thể luyện tập cho mỗi chủ đề.</p></div><div className="roadmap-stats"><span><b>2.100</b><small>bài nghe - nói</small></span><span><b>60</b><small>chủ đề đời sống</small></span><span><b>7</b><small>cấp năng lực</small></span><span><b>5</b><small>biến thể mỗi chủ đề</small></span></div><div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Học mỗi ngày: {stage.daily}</div><footer><span>Đầu ra</span><span>{stage.output}</span></footer></div></article>)}</div><div className="roadmap-support"><article><h3>Chu trình 1 bài học</h3><ol>{studyCycle.map((item) => <li key={item}>{item}</li>)}</ol></article><article><h3>Khi nào lên cấp?</h3><ol>{levelUpChecks.map((item) => <li key={item}>{item}</li>)}</ol></article><article className="source-guide"><h3>Nguồn chuẩn dùng để thiết kế lại</h3><ol>{sourceGuides.map((item) => <li key={item}>{item}</li>)}</ol></article></div></div>}
 
         {activeView === "programs" && <div className="tracks-section app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH THEO NĂNG LỰC</span><h2>Từ Beginner đến thông hiểu - thành thạo</h2></div><p>Chọn cấp độ hiện tại để lọc chủ đề, độ dài hội thoại và bài luyện nói phù hợp.</p></div><div className="track-grid">{fluencyStages.map((item) => <article key={item.id} className={stage === item.id ? "selected-card" : ""} onClick={() => setStage(item.id)}><span>{item.icon}</span><b>{item.label}</b><small>{`${item.vi} · ${item.level}`}</small><p>{item.promise}</p><ul>{item.goals.map((goal) => <li key={goal}>{goal}</li>)}</ul><button className="button secondary" onClick={(event) => { event.stopPropagation(); setStage(item.id); openView("topics"); }}>Xem chủ đề</button></article>)}</div></div>}
 
@@ -452,7 +512,7 @@ export default function Home() {
         {activeView === "topics" && <div className="lesson-section app-panel"><div className="section-heading"><div><span className="kicker">CHỦ ĐỀ SONG NGỮ</span><h2>{selectedStage.label}: bài nghe - nói theo đời sống</h2><p className="catalog-summary">Mỗi chủ đề đều có bài luyện nói song ngữ trước phần câu hỏi.</p></div><div className="filters">{fluencyStages.map((item) => <button key={item.id} className={stage === item.id ? "active" : ""} onClick={() => setStage(item.id)}>{item.label}</button>)}</div></div><div className="catalog-tools"><label className="search-box">Tìm <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="chủ đề, bản dịch, cấp độ..." /></label><span><b>{filteredTopics.length}</b> chủ đề phù hợp</span></div><div className="lesson-grid">{filteredTopics.map((topic) => <article key={topic.id} onClick={() => setOpenTopic(topic)}><div className="lesson-visual"><span>{topic.level}</span><button aria-label={`Mở ${topic.vi}`}>▶</button><i>{selectedStage.label}</i></div><div className="lesson-body"><div className="lesson-tags"><span className="pill blue">{topic.en}</span></div><h3>{topic.vi}</h3><p>{topic.listenTask}</p><div className="format">Luyện nói: {topic.speakTask}</div><footer><span>{topic.variant}</span><span>12-18 phút</span></footer></div></article>)}</div></div>}
       </section>
 
-      {openTopic && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={() => setOpenTopic(null)}/><div className="lesson-panel"><button className="close" onClick={() => setOpenTopic(null)}>×</button><header><span className="lesson-icon">{openTopic.level}</span><div><span className="pill blue">{openTopic.en}</span><h2>{openTopic.vi}</h2><p>Dạng bài: {openTopic.variant}. Thứ tự: nghe song ngữ → luyện nói song ngữ → ghi âm → câu hỏi.</p></div></header><section className="listen-block"><h3>1. Bài nghe song ngữ</h3><div className="audio-player"><button onClick={() => playTopic(openTopic)}>{playing ? "Ⅱ" : "▶"}</button><Wave active={playing}/><span>Nghe tiếng Anh bằng giọng đọc trình duyệt</span></div><button className="transcript-toggle" onClick={() => setShowVietnamese(!showVietnamese)}>{showVietnamese ? "Ẩn dịch tiếng Việt" : "Hiện dịch tiếng Việt"}</button><div className="transcript bilingual-lines">{openTopic.lines.map(([en, vi]) => <p key={en}><b>{en}</b>{showVietnamese && <span>{vi}</span>}</p>)}</div></section><section><h3>2. Bài luyện nói song ngữ</h3><div className="speaking-drill-list">{speakingDrills(openTopic).map((drill) => <article key={drill.en}><b>{drill.en}</b><span>{drill.vi}</span><small>{drill.action}</small></article>)}</div><p><b>Nhiệm vụ nói:</b> {openTopic.speakTask}</p></section><section className="speaking-practice"><h3>3. Ghi âm luyện nói</h3><p>Nói lại câu mẫu, sau đó đổi thông tin thành câu của bạn: người, nơi chốn, lý do, thời gian.</p><button className={`record-button ${recording ? "active" : ""}`} onClick={recordSpeech}><b>{recording ? "Dừng và lưu bản ghi" : "Bắt đầu nói"}</b><small>{recording ? "Đang ghi âm" : "Cho phép micro để luyện nói"}</small></button>{recordingUrl && <div className="recording-result"><audio controls src={recordingUrl}/></div>}</section><section><h3>4. Câu hỏi sau luyện nói</h3><div className="question-list">{topicQuestions(openTopic).map((item) => <article key={item.q}><b>{item.q}</b><span>{item.vi}</span><small>Gợi ý: {item.answer}</small></article>)}</div></section></div></div>}
+      {openTopic && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={() => setOpenTopic(null)}/><div className="lesson-panel"><button className="close" onClick={() => setOpenTopic(null)}>×</button><header><span className="lesson-icon">{openTopic.level}</span><div><span className="pill blue">{openTopic.en}</span><h2>{openTopic.vi}</h2><p>Dạng bài: {openTopic.variant}. Thứ tự: nghe song ngữ → luyện nói song ngữ → ghi âm → câu hỏi.</p></div></header><section className="listen-block"><h3>1. Bài nghe song ngữ</h3><div className="audio-player"><button onClick={() => playTopic(openTopic)}>{playing ? "Ⅱ" : "▶"}</button><Wave active={playing}/><span>Nghe 2 giọng nam/nữ, không đọc tên người đối thoại</span></div><button className="transcript-toggle" onClick={() => setShowVietnamese(!showVietnamese)}>{showVietnamese ? "Ẩn dịch tiếng Việt" : "Hiện dịch tiếng Việt"}</button><div className="transcript bilingual-lines">{openTopic.lines.map((line, index) => <p key={`${line.speaker}-${index}-${line.en}`}><small>{line.speaker === "female" ? "Giọng nữ" : "Giọng nam"}</small><b>{line.en}</b>{showVietnamese && <span>{line.vi}</span>}</p>)}</div></section><section><h3>2. Bài luyện nói song ngữ</h3><div className="speaking-drill-list">{speakingDrills(openTopic).map((drill) => <article key={drill.en}><b>{drill.en}</b><span>{drill.vi}</span><small>{drill.action}</small></article>)}</div><p><b>Nhiệm vụ nói:</b> {openTopic.speakTask}</p></section><section className="speaking-practice"><h3>3. Ghi âm luyện nói</h3><p>Nói lại câu mẫu, sau đó đổi thông tin thành câu của bạn: người, nơi chốn, lý do, thời gian.</p><button className={`record-button ${recording ? "active" : ""}`} onClick={recordSpeech}><b>{recording ? "Dừng và lưu bản ghi" : "Bắt đầu nói"}</b><small>{recording ? "Đang ghi âm" : "Cho phép micro để luyện nói"}</small></button>{recordingUrl && <div className="recording-result"><audio controls src={recordingUrl}/></div>}</section><section><h3>4. Câu hỏi sau luyện nói</h3><div className="question-list">{topicQuestions(openTopic).map((item) => <article key={item.q}><b>{item.q}</b><span>{item.vi}</span><small>Gợi ý: {item.answer}</small></article>)}</div></section></div></div>}
       <footer className="footer"><div className="brand"><span className="brand-mark">SL</span><span>SpeakUp <b>Second Language</b></span></div><p>Chương trình luyện nghe - nói phản xạ, hướng tới dùng tiếng Anh như ngôn ngữ thứ hai.</p><span>Nội dung tự biên soạn, có dịch tiếng Việt để hỗ trợ hiểu và luyện nói.</span></footer>
     </main>
   );
