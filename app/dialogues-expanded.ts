@@ -83,6 +83,40 @@ const bands: Array<{ stageId: StageId; level: string; target: number }> = [
 
 const l = (speaker: "female" | "male", en: string, vi: string): DialogueLine => ({ speaker, en, vi });
 
+function variantExchange(s: Scenario, stageId: StageId, variantIndex: number): DialogueLine[] {
+  const simple = stageId === "beginner" || stageId === "elementary";
+  const advanced = stageId === "advanced" || stageId === "proficient";
+  const exchanges: DialogueLine[][] = simple ? [
+    [l("male", "What do we need to do?", "Chúng ta cần làm gì?"), l("female", `We need to ${s.need[0]}.`, `Chúng ta cần ${s.need[1]}.`)],
+    [l("male", `Do you mean we should ${s.optionA[0]}?`, `Ý bạn là chúng ta nên ${s.optionA[1]} phải không?`), l("female", "Yes, that is what I mean.", "Đúng, ý tôi là như vậy.")],
+    [l("male", "Do we have another choice?", "Chúng ta có lựa chọn khác không?"), l("female", `Yes. We can also ${s.optionB[0]}.`, `Có. Chúng ta cũng có thể ${s.optionB[1]}.`)],
+    [l("male", "What is the problem?", "Vấn đề là gì?"), l("female", `The problem is that ${s.obstacle[0]}.`, `Vấn đề là ${s.obstacle[1]}.`)],
+    [l("male", "What did we learn?", "Chúng ta đã học được gì?"), l("female", "A clear plan can help.", "Một kế hoạch rõ ràng có thể giúp ích.")],
+    [l("male", "Sorry, did I understand you correctly?", "Xin lỗi, tôi đã hiểu đúng ý bạn chưa?"), l("female", `Almost. I said we could ${s.optionB[0]}.`, `Gần đúng. Tôi nói rằng chúng ta có thể ${s.optionB[1]}.`)],
+    [l("male", "I will ask, and you can answer.", "Tôi sẽ hỏi và bạn có thể trả lời."), l("female", "All right. Let’s begin.", "Được. Chúng ta bắt đầu nhé.")],
+    [l("male", "What would you choose?", "Bạn sẽ chọn gì?"), l("female", `I would ${s.optionA[0]}.`, `Tôi sẽ ${s.optionA[1]}.`)],
+  ] : advanced ? [
+    [l("male", "Before considering solutions, how would you define the central issue?", "Trước khi cân nhắc giải pháp, bạn sẽ xác định vấn đề cốt lõi thế nào?"), l("female", `The central issue is how to ${s.need[0]} without overlooking the fact that ${s.obstacle[0]}.`, `Vấn đề cốt lõi là làm sao ${s.need[1]} mà không bỏ qua việc ${s.obstacle[1]}.`)],
+    [l("male", "When you describe that as practical, which criterion are you using?", "Khi gọi cách đó là thực tế, bạn đang dùng tiêu chí nào?"), l("female", `I mean that it should lead to this outcome: ${s.result[0]}.`, `Ý tôi là cách đó nên dẫn đến kết quả này: ${s.result[1]}.`)],
+    [l("male", "How do the alternatives differ beyond their immediate convenience?", "Các phương án khác nhau thế nào ngoài sự thuận tiện trước mắt?"), l("female", `To ${s.optionA[0]} prioritises certainty, whereas choosing to ${s.optionB[0]} preserves more flexibility.`, `Việc ${s.optionA[1]} ưu tiên sự chắc chắn, trong khi chọn ${s.optionB[1]} giữ được nhiều linh hoạt hơn.`)],
+    [l("male", "Which obstacle must be addressed before either option can work?", "Trở ngại nào phải được xử lý trước khi bất kỳ phương án nào có hiệu quả?"), l("female", `We first need to address the fact that ${s.obstacle[0]}.`, `Trước tiên chúng ta cần xử lý việc ${s.obstacle[1]}.`)],
+    [l("male", "What broader lesson can reasonably be drawn from this case?", "Có thể rút ra bài học rộng hơn nào một cách hợp lý từ trường hợp này?"), l("female", `It suggests that ${s.value[0]}, although the lesson should still be applied with regard to context.`, `Trường hợp này cho thấy ${s.value[1]}, dù bài học vẫn cần được áp dụng có xét đến hoàn cảnh.`)],
+    [l("male", "I may have interpreted your recommendation as a fixed rule. Was that your intention?", "Có lẽ tôi đã hiểu khuyến nghị của bạn như một quy tắc cố định. Đó có phải ý bạn không?"), l("female", "No. I was proposing a context-sensitive choice, not a rule that should apply everywhere.", "Không. Tôi đề xuất một lựa chọn phù hợp bối cảnh, không phải quy tắc áp dụng ở mọi nơi.")],
+    [l("male", "Let me challenge the proposal from the other side so that we can test it properly.", "Để tôi phản biện đề xuất từ phía đối diện để chúng ta kiểm tra nó kỹ hơn."), l("female", "Please do. A credible proposal should be able to withstand a fair objection.", "Xin cứ làm vậy. Một đề xuất đáng tin phải chịu được phản biện công bằng.")],
+    [l("male", "How would your own circumstances affect this decision?", "Hoàn cảnh riêng của bạn sẽ ảnh hưởng quyết định này thế nào?"), l("female", `I would favour the option that helps achieve the intended result—${s.result[0]}—without shifting an unreasonable burden to someone else.`, `Tôi sẽ nghiêng về phương án giúp đạt kết quả mong muốn—${s.result[1]}—mà không chuyển gánh nặng bất hợp lý sang người khác.`)],
+  ] : [
+    [l("male", "What is the main outcome we are trying to achieve?", "Kết quả chính chúng ta muốn đạt được là gì?"), l("female", `The aim is to ${s.need[0]} and, ultimately, ensure that ${s.result[0]}.`, `Mục tiêu là ${s.need[1]} và cuối cùng bảo đảm rằng ${s.result[1]}.`)],
+    [l("male", "Could you clarify what makes the original plan difficult?", "Bạn có thể làm rõ điều gì khiến kế hoạch ban đầu khó thực hiện không?"), l("female", `Certainly. The difficulty is that ${s.obstacle[0]}.`, `Được. Khó khăn là ${s.obstacle[1]}.`)],
+    [l("male", "How would you compare the two realistic options?", "Bạn sẽ so sánh hai phương án thực tế thế nào?"), l("female", `We can either ${s.optionA[0]} or ${s.optionB[0]}; each solves a different part of the problem.`, `Chúng ta có thể ${s.optionA[1]} hoặc ${s.optionB[1]}; mỗi cách giải quyết một phần khác nhau của vấn đề.`)],
+    [l("male", "What should we deal with first?", "Chúng ta nên xử lý điều gì trước?"), l("female", `First, we should respond directly to the fact that ${s.obstacle[0]}.`, `Trước tiên, chúng ta nên xử lý trực tiếp việc ${s.obstacle[1]}.`)],
+    [l("male", "What lesson would you carry into a similar situation?", "Bạn sẽ mang bài học nào sang tình huống tương tự?"), l("female", `I would remember that ${s.value[0]}.`, `Tôi sẽ nhớ rằng ${s.value[1]}.`)],
+    [l("male", "I thought you preferred the first option. Have I misunderstood?", "Tôi nghĩ bạn thích phương án đầu. Tôi đã hiểu nhầm phải không?"), l("female", `A little. I prefer to ${s.optionB[0]} in this particular situation.`, `Một chút. Trong tình huống cụ thể này, tôi muốn ${s.optionB[1]}.`)],
+    [l("male", "Shall we switch roles and test both sides of the conversation?", "Chúng ta đổi vai và thử cả hai phía của cuộc hội thoại nhé?"), l("female", "Yes. That will help us respond instead of memorising one answer.", "Được. Cách đó giúp chúng ta phản hồi thay vì ghi nhớ một câu trả lời.")],
+    [l("male", "Which option fits your own life more closely?", "Phương án nào phù hợp hơn với cuộc sống của bạn?"), l("female", `For me, it would be more realistic to ${s.optionA[0]}, but I would review the result afterwards.`, `Với tôi, ${s.optionA[1]} sẽ thực tế hơn, nhưng sau đó tôi sẽ xem lại kết quả.`)],
+  ];
+  return exchanges[variantIndex];
+}
+
 function makeLines(s: Scenario, stageId: StageId, variantIndex: number): DialogueLine[] {
   const extra = variantIndex % 2 === 0 ? s.optionA : s.optionB;
   const moves: Pair[] = [
@@ -96,72 +130,73 @@ function makeLines(s: Scenario, stageId: StageId, variantIndex: number): Dialogu
     ["Let’s connect this situation to our own experience.", "Hãy liên hệ tình huống này với trải nghiệm của chúng ta."],
   ];
   const move = moves[variantIndex];
-  if (stageId === "beginner") return [
+  const shape = (lines: DialogueLine[]) => [lines[0], ...variantExchange(s, stageId, variantIndex), ...lines.slice(3)];
+  if (stageId === "beginner") return shape([
     l("female", `Hello. I need to ${s.need[0]}. ${move[0]}`, `Xin chào. Tôi cần ${s.need[1]}. ${move[1]}`),
     l("male", `Okay. We are ${s.place[0]}.`, `Được. Chúng ta đang ${s.place[1]}.`),
     l("female", `Can we ${extra[0]}?`, `Chúng ta có thể ${extra[1]} không?`),
     l("male", `Yes. That is a good plan.`, `Có. Đó là một kế hoạch tốt.`),
     l("female", `Great. Let’s do it.`, `Tuyệt. Chúng ta làm nhé.`),
-  ];
-  if (stageId === "elementary") return [
+  ]);
+  if (stageId === "elementary") return shape([
     l("female", `Excuse me. I want to ${s.need[0]}. ${move[0]}`, `Xin lỗi. Tôi muốn ${s.need[1]}. ${move[1]}`),
     l("male", `Of course. What is the problem?`, `Được chứ. Vấn đề là gì?`),
     l("female", `The problem is that ${s.obstacle[0]}.`, `Vấn đề là ${s.obstacle[1]}.`),
     l("male", `Would you like to ${extra[0]}?`, `Bạn có muốn ${extra[1]} không?`),
     l("female", `Yes, please. Does that work?`, `Có. Như vậy có được không?`),
     l("male", `Yes. It will help us ${s.result[0]}.`, `Được. Việc đó sẽ giúp ${s.result[1]}.`),
-  ];
-  if (stageId === "pre-intermediate") return [
+  ]);
+  if (stageId === "pre-intermediate") return shape([
     l("female", `We need to ${s.need[0]}, but ${s.obstacle[0]}. ${move[0]}`, `Chúng ta cần ${s.need[1]}, nhưng ${s.obstacle[1]}. ${move[1]}`),
     l("male", `Why don’t we ${s.optionA[0]}?`, `Sao chúng ta không ${s.optionA[1]}?`),
     l("female", `That could work. Another idea is to ${s.optionB[0]}.`, `Cách đó có thể được. Một ý khác là ${s.optionB[1]}.`),
     l("male", `Which option is easier today?`, `Hôm nay phương án nào dễ hơn?`),
     l("female", `I prefer to ${extra[0]} because it fits our situation.`, `Tôi muốn ${extra[1]} vì phù hợp với tình huống của chúng ta.`),
     l("male", `Good. Then we can ${s.result[0]}.`, `Tốt. Vậy chúng ta có thể ${s.result[1]}.`),
-  ];
-  if (stageId === "intermediate") return [
+  ]);
+  if (stageId === "intermediate") return shape([
     l("female", `I ran into a problem ${s.place[0]} while trying to ${s.need[0]}. ${move[0]}`, `Tôi gặp một vấn đề ${s.place[1]} khi cố ${s.need[1]}. ${move[1]}`),
     l("male", `What made the situation difficult?`, `Điều gì khiến tình huống trở nên khó khăn?`),
     l("female", `${s.obstacle[0]}, so my original plan no longer worked.`, `${s.obstacle[1]}, nên kế hoạch ban đầu của tôi không còn hiệu quả.`),
     l("male", `Did you consider both available options?`, `Bạn đã cân nhắc cả hai phương án chưa?`),
     l("female", `Yes. I could ${s.optionA[0]}, or I could ${s.optionB[0]}.`, `Rồi. Tôi có thể ${s.optionA[1]}, hoặc ${s.optionB[1]}.`),
     l("male", `What did you decide?`, `Bạn đã quyết định thế nào?`),
-    l("female", `I chose to ${extra[0]}, and that helped ${s.result[0]}.`, `Tôi chọn ${extra[1]}, và điều đó giúp ${s.result[1]}.`),
+    l("female", `I chose to ${extra[0]}. As a result, ${s.result[0]}.`, `Tôi chọn ${extra[1]}. Nhờ vậy, ${s.result[1]}.`),
     l("male", `That shows why ${s.value[0]}.`, `Điều đó cho thấy vì sao ${s.value[1]}.`),
-  ];
-  if (stageId === "upper-intermediate") return [
+  ]);
+  if (stageId === "upper-intermediate") return shape([
     l("female", `We need a practical way to ${s.need[0]}, given that ${s.obstacle[0]}. ${move[0]}`, `Chúng ta cần một cách thực tế để ${s.need[1]}, trong khi ${s.obstacle[1]}. ${move[1]}`),
     l("male", `The first option is to ${s.optionA[0]}. What is the alternative?`, `Phương án đầu là ${s.optionA[1]}. Phương án thay thế là gì?`),
     l("female", `We could also ${s.optionB[0]}. It may involve a different trade-off.`, `Chúng ta cũng có thể ${s.optionB[1]}. Cách đó có thể có đánh đổi khác.`),
     l("male", `Which option would you recommend, and on what grounds?`, `Bạn khuyên chọn phương án nào và dựa trên cơ sở gì?`),
-    l("female", `I would ${extra[0]} because it is more likely to help ${s.result[0]}.`, `Tôi sẽ ${extra[1]} vì có nhiều khả năng giúp ${s.result[1]}.`),
+    l("female", `I would ${extra[0]} because it offers the clearest path forward. If it works, ${s.result[0]}.`, `Tôi sẽ ${extra[1]} vì đó là hướng đi rõ ràng nhất. Nếu hiệu quả, ${s.result[1]}.`),
     l("male", `Is there a disadvantage we should acknowledge?`, `Có bất lợi nào chúng ta nên thừa nhận không?`),
     l("female", `Yes, but the disadvantage is manageable if we communicate clearly.`, `Có, nhưng bất lợi đó có thể xử lý nếu chúng ta giao tiếp rõ ràng.`),
     l("male", `Then the recommendation is balanced rather than automatic.`, `Vậy khuyến nghị này cân bằng chứ không máy móc.`),
-  ];
-  if (stageId === "advanced") return [
+  ]);
+  if (stageId === "advanced") return shape([
     l("female", `At first glance, the aim to ${s.need[0]} seems straightforward. ${move[0]}`, `Thoạt nhìn, mục tiêu ${s.need[1]} có vẻ đơn giản. ${move[1]}`),
     l("male", `Yet the fact that ${s.obstacle[0]} complicates the decision.`, `Tuy nhiên, việc ${s.obstacle[1]} khiến quyết định phức tạp hơn.`),
     l("female", `Exactly. We could ${s.optionA[0]}, which prioritises immediate practicality.`, `Chính xác. Ta có thể ${s.optionA[1]}, cách này ưu tiên tính thực tế trước mắt.`),
     l("male", `Whereas choosing to ${s.optionB[0]} may protect a different interest.`, `Trong khi chọn ${s.optionB[1]} có thể bảo vệ một lợi ích khác.`),
     l("female", `My preference is to ${extra[0]}, though I would not present it as risk-free.`, `Tôi thiên về ${extra[1]}, dù tôi sẽ không nói rằng cách đó không có rủi ro.`),
     l("male", `What evidence would make you revise that preference?`, `Bằng chứng nào sẽ khiến bạn thay đổi lựa chọn đó?`),
-    l("female", `I would reconsider if it no longer helped ${s.result[0]} or imposed hidden costs on others.`, `Tôi sẽ cân nhắc lại nếu nó không còn giúp ${s.result[1]} hoặc tạo chi phí ẩn cho người khác.`),
+    l("female", `I would reconsider if the choice no longer led to the intended outcome—${s.result[0]}—or if it imposed hidden costs on others.`, `Tôi sẽ cân nhắc lại nếu lựa chọn không còn dẫn đến kết quả mong muốn—${s.result[1]}—hoặc tạo chi phí ẩn cho người khác.`),
     l("male", `That condition makes the proposal more accountable.`, `Điều kiện đó khiến đề xuất có trách nhiệm giải trình hơn.`),
     l("female", `More broadly, the case illustrates that ${s.value[0]}.`, `Rộng hơn, trường hợp này cho thấy ${s.value[1]}.`),
-  ];
-  return [
+  ]);
+  return shape([
     l("female", `The apparent simplicity of trying to ${s.need[0]} conceals a question of judgment. ${move[0]}`, `Sự đơn giản bề ngoài của việc ${s.need[1]} che giấu một câu hỏi về phán đoán. ${move[1]}`),
     l("male", `Particularly because ${s.obstacle[0]}; no option is neutral once the consequences are considered.`, `Đặc biệt vì ${s.obstacle[1]}; không phương án nào trung lập khi xét đến hệ quả.`),
     l("female", `We might ${s.optionA[0]}, although that privileges certainty and immediate control.`, `Ta có thể ${s.optionA[1]}, dù cách đó ưu tiên sự chắc chắn và kiểm soát trước mắt.`),
     l("male", `Alternatively, we could ${s.optionB[0]}, accepting ambiguity in exchange for flexibility.`, `Hoặc ta có thể ${s.optionB[1]}, chấp nhận mơ hồ để đổi lấy linh hoạt.`),
     l("female", `I lean toward the latter in this context, but I would resist turning that preference into a universal rule.`, `Trong bối cảnh này tôi nghiêng về phương án sau, nhưng không muốn biến lựa chọn đó thành quy tắc phổ quát.`),
     l("male", `That qualification matters. What would responsible implementation require?`, `Giới hạn đó quan trọng. Việc triển khai có trách nhiệm đòi hỏi điều gì?`),
-    l("female", `Clear ownership, a review point, and an explicit test of whether we actually ${s.result[0]}.`, `Cần trách nhiệm rõ ràng, thời điểm xem xét lại và phép thử cụ thể xem ta có thực sự ${s.result[1]} hay không.`),
+    l("female", `Clear ownership, a review point, and an explicit test of the intended outcome: did we reach a point where ${s.result[0]}?`, `Cần trách nhiệm rõ ràng, thời điểm xem xét lại và phép thử cụ thể cho kết quả mong muốn: chúng ta đã đạt đến trạng thái ${s.result[1]} chưa?`),
     l("male", `So revision would represent learning rather than failure.`, `Vậy điều chỉnh sẽ thể hiện việc học hỏi chứ không phải thất bại.`),
     l("female", `Precisely. It also respects the broader principle that ${s.value[0]}.`, `Chính xác. Cách đó cũng tôn trọng nguyên tắc rộng hơn rằng ${s.value[1]}.`),
     l("male", `That gives us a decision we can defend without pretending the uncertainty has disappeared.`, `Như vậy ta có quyết định có thể bảo vệ mà không giả vờ rằng sự không chắc chắn đã biến mất.`),
-  ];
+  ]);
 }
 
 export const expandedTopics: DialogueLesson[] = bands.flatMap((band, bandIndex) =>
