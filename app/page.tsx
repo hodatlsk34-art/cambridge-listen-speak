@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { topics as curatedTopics } from "./dialogues";
+import { expandedTopics } from "./dialogues-expanded";
 
 const fluencyStages = [
   { id: "beginner", label: "Beginner", vi: "Bắt đầu", level: "A0-Pre A1", icon: "A0", promise: "Chào hỏi, gọi tên, lựa chọn và trả lời thật ngắn.", goals: ["Chào hỏi", "Gọi tên", "Lựa chọn", "Trả lời ngắn"] },
@@ -33,7 +35,7 @@ const studyCycle = [
 ] as const;
 
 const levelUpChecks = [
-  "Hoàn thành ít nhất 40 bài ở cấp hiện tại.",
+  "Hoàn thành toàn bộ bài ở cấp hiện tại và luyện lại những bài còn vấp.",
   "Nghe lại hội thoại và hiểu được ý chính không cần nhìn dịch.",
   "Nói được bài phản xạ đúng độ dài yêu cầu của cấp.",
   "Tự tạo được câu mới, không chỉ đọc lại câu mẫu.",
@@ -51,8 +53,8 @@ const levelBands = [
 
 const sourceGuides = [
   "CEFR: dùng mô tả năng lực A1-C2 để tăng dần độ dài, độ tự nhiên và mức độc lập khi nói.",
-  "British Council LearnEnglish Speaking: dùng nhóm chức năng như meeting people, checking understanding, making suggestions, showing interest, talking about work và giving advice.",
-  "Cambridge English: dùng định hướng CEFR để giữ lộ trình từ basic user đến proficient user.",
+  "Taskmaster, MultiWOZ và Schema-Guided Dialogue: tham khảo miền giao tiếp đời sống và cấu trúc tình huống có mục tiêu.",
+  "Nội dung bài học được biên soạn mới, không sao chép nguyên văn transcript từ corpus bên ngoài.",
 ] as const;
 
 const topicSeeds = [
@@ -351,7 +353,7 @@ function makeLines(seed: (typeof topicSeeds)[number], bandIndex: number, stageLa
   });
 }
 
-const topics = levelBands.flatMap((band, bandIndex) =>
+const generatedTemplateTopics = false ? levelBands.flatMap((band, bandIndex) =>
   topicSeeds.flatMap((seed, seedIndex) =>
     lessonVariants.map((variant, variantIndex) => ({
       id: `${band.stageId}-${seedIndex + 1}-${variant.id}`,
@@ -366,10 +368,45 @@ const topics = levelBands.flatMap((band, bandIndex) =>
       speakTask: `${band.speak} Trọng tâm: ${band.viFunction}. Chủ đề: ${seed[1]}. Bài ${variantIndex + 1}: ${variant.label}.`,
     }))
   )
-);
+) : [];
+
+// The former template engine is retained temporarily for migration reference,
+// but every lesson shown to learners now comes from the reviewed corpus.
+void generatedTemplateTopics;
+const topics = [...curatedTopics, ...expandedTopics];
 
 type Topic = (typeof topics)[number];
 type ActiveView = "overview" | "roadmap" | "programs" | "method" | "topics";
+
+const dailyLifeThemes = [
+  { id: "home", icon: "⌂", title: "Nhà ở & sinh hoạt", en: "Home & daily routines", description: "Việc nhà, sửa chữa, bữa sáng và tổ chức nhịp sống hằng ngày.", match: /breakfast|housing|repair|routine|sleep|helping|table/i },
+  { id: "family", icon: "♡", title: "Gia đình & nuôi dạy con", en: "Family & parenting", description: "Chuẩn bị đi học, chia trách nhiệm, trò chuyện và xây dựng thói quen gia đình.", match: /parenting|family|children|pet-care/i },
+  { id: "food", icon: "◉", title: "Ăn uống & nấu ăn", en: "Food & cooking", description: "Gọi món, hỏi nguyên liệu, nấu ăn và lựa chọn bữa ăn phù hợp.", match: /restaurant|lunch|food|meal|cooking/i },
+  { id: "shopping", icon: "▱", title: "Mua sắm & quần áo", en: "Shopping & clothing", description: "Chọn quà, mua quần áo, so sánh sản phẩm và đổi trả.", match: /shopping|shirt|clothes|jacket|gift/i },
+  { id: "school", icon: "A+", title: "Trường học & học tập", en: "School & learning", description: "Lớp học, thư viện, ôn thi, dự án nhóm và thuyết trình.", match: /school|classroom|library|study|test|project|presentation|pencil|word/i },
+  { id: "work", icon: "▣", title: "Công việc & nghề nghiệp", en: "Work & career", description: "Đồng nghiệp, cuộc họp, làm việc từ xa, phản hồi và lựa chọn nghề nghiệp.", match: /work|career|colleague|meeting|remote|feedback|failure/i },
+  { id: "transport", icon: "→", title: "Đi lại & phương tiện", en: "Travel & transport", description: "Xe buýt, tàu, hỏi đường và xử lý thay đổi hành trình.", match: /bus|train|transport|direction|route/i },
+  { id: "tourism", icon: "◎", title: "Du lịch & lưu trú", en: "Tourism & accommodation", description: "Sân bay, khách sạn, bảo tàng, vé và lịch trình tham quan.", match: /airport|hotel|museum|gate|trip|travel-delay/i },
+  { id: "services", icon: "✓", title: "Dịch vụ & lịch hẹn", en: "Services & appointments", description: "Đặt lịch, hỗ trợ kỹ thuật, đồ thất lạc và yêu cầu trợ giúp.", match: /appointment|phone|lost|wallet|card|pharmacy|service/i },
+  { id: "finance", icon: "$", title: "Tiền bạc & ngân hàng", en: "Money & banking", description: "Thanh toán, ngân sách, tiết kiệm và quyết định tài chính cá nhân.", match: /bank|personal-finance|budget|payment/i },
+  { id: "health", icon: "+", title: "Sức khỏe & cân bằng", en: "Health & wellbeing", description: "Giấc ngủ, thói quen lành mạnh và giao tiếp về sức khỏe.", match: /health|medical|tired/i },
+  { id: "sports", icon: "●", title: "Thể thao & vận động", en: "Sports & fitness", description: "Chọn lớp, luyện tập, xây dựng lịch vận động và tiến bộ an toàn.", match: /sports|fitness/i },
+  { id: "relationships", icon: "∞", title: "Bạn bè & quan hệ", en: "Friends & relationships", description: "Mời bạn, xin lỗi, góp ý và giải quyết bất đồng tôn trọng.", match: /friend|neighbour|apology|quiet|relationship/i },
+  { id: "community", icon: "⌘", title: "Cộng đồng & dịch vụ công", en: "Community & public services", description: "Tình nguyện, hoạt động khu phố, giấy tờ và an toàn cộng đồng.", match: /community|volunteer|garden|clean-up|public-service|emergency/i },
+  { id: "technology", icon: "⌁", title: "Công nghệ & thiết bị", en: "Technology & devices", description: "Điện thoại, AI, dữ liệu, hỗ trợ kỹ thuật và sử dụng có trách nhiệm.", match: /technology|ai-work|data-story/i },
+  { id: "media", icon: "▶", title: "Tin tức & giải trí", en: "News & entertainment", description: "Phim ảnh, âm nhạc, sự kiện và thảo luận thông tin cẩn trọng.", match: /movie|music|concert|event|news/i },
+  { id: "nature", icon: "♧", title: "Thiên nhiên & môi trường", en: "Nature & environment", description: "Hoạt động ngoài trời, năng lượng, bảo tồn và lựa chọn xanh.", match: /nature|energy|sustainable|environment/i },
+  { id: "culture", icon: "✦", title: "Lễ hội & văn hóa", en: "Celebrations & culture", description: "Lễ kỷ niệm, truyền thống, sự hòa nhập và thay đổi văn hóa.", match: /celebration|cultural|tradition/i },
+  { id: "hobbies", icon: "✎", title: "Sở thích & sáng tạo", en: "Hobbies & creativity", description: "Nghệ thuật, lớp sáng tạo, đọc sách và luyện ngôn ngữ mỗi ngày.", match: /creative-hobby|language-learning|art-value|hobby/i },
+  { id: "ideas", icon: "◇", title: "Ý tưởng & quan điểm", en: "Ideas & opinions", description: "So sánh lựa chọn, chính sách, văn hóa, nghệ thuật, lãnh đạo và tranh luận có sắc thái.", match: /policy|art|cultural|leadership|public-space|medical|fair|choice/i },
+] as const;
+
+type DailyLifeThemeId = (typeof dailyLifeThemes)[number]["id"];
+
+function themeForTopic(topic: Topic): DailyLifeThemeId {
+  const haystack = `${topic.id} ${topic.en} ${topic.vi} ${topic.baseTopic}`;
+  return dailyLifeThemes.find((theme) => theme.match.test(haystack))?.id ?? "ideas";
+}
 
 function Wave({ active = false }: { active?: boolean }) {
   return <div className={`wave ${active ? "active" : ""}`}>{[16,28,18,42,52,24,48,33,20,44,58,31,18,46,34,24,52,29,40,16].map((height, index) => <span key={index} style={{ height }} />)}</div>;
@@ -406,6 +443,7 @@ function pickVoice(voices: SpeechSynthesisVoice[], speaker: DialogueLine["speake
 export default function Home() {
   const [activeView, setActiveView] = useState<ActiveView>("overview");
   const [stage, setStage] = useState<FluencyStageId>("beginner");
+  const [theme, setTheme] = useState<DailyLifeThemeId>("home");
   const [query, setQuery] = useState("");
   const [openTopic, setOpenTopic] = useState<Topic | null>(null);
   const [showVietnamese, setShowVietnamese] = useState(true);
@@ -415,10 +453,12 @@ export default function Home() {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const selectedStage = fluencyStages.find((item) => item.id === stage) ?? fluencyStages[0];
+  const selectedTheme = dailyLifeThemes.find((item) => item.id === theme) ?? dailyLifeThemes[0];
   const filteredTopics = useMemo(() => topics.filter((topic) =>
+    themeForTopic(topic) === theme &&
     topic.stageId === stage &&
     (!query || `${topic.en} ${topic.vi} ${topic.level}`.toLowerCase().includes(query.toLowerCase()))
-  ), [stage, query]);
+  ), [stage, theme, query]);
 
   const openView = (view: ActiveView) => {
     setActiveView(view);
@@ -484,9 +524,9 @@ export default function Home() {
         <nav className="app-nav" aria-label="Menu nội dung">
           <button className={activeView === "overview" ? "active" : ""} onClick={() => openView("overview")}>Tổng quan</button>
           <button className={activeView === "roadmap" ? "active" : ""} onClick={() => openView("roadmap")}>Lộ trình</button>
-          <button className={activeView === "programs" ? "active" : ""} onClick={() => openView("programs")}>Cấp độ</button>
+          <button className={activeView === "programs" ? "active" : ""} onClick={() => openView("programs")}>Chủ đề đời sống</button>
           <button className={activeView === "method" ? "active" : ""} onClick={() => openView("method")}>Phản xạ</button>
-          <button className={activeView === "topics" ? "active" : ""} onClick={() => openView("topics")}>Chủ đề</button>
+          <button className={activeView === "topics" ? "active" : ""} onClick={() => openView("topics")}>Bài học</button>
         </nav>
         <a className="hello" href="/login">Đăng nhập</a>
       </header>
@@ -496,20 +536,20 @@ export default function Home() {
           <div className="hero-copy">
             <div className="eyebrow">NGHE - NÓI PHẢN XẠ</div>
             <h1>Biến tiếng Anh<br/><em>thành ngôn ngữ thứ hai.</em></h1>
-            <p>Ứng dụng được cấu trúc theo menu. Bạn chọn một mục ở trên, nội dung tương ứng mới hiện ra, không còn kiểu landing page phải kéo dài liên tục.</p>
-            <div className="hero-actions"><button className="button primary" onClick={() => openView("programs")}>Chọn cấp độ</button><button className="button secondary" onClick={() => openView("topics")}>Vào bài song ngữ</button></div>
+            <p>Chọn một chủ đề quen thuộc trong đời sống, bắt đầu bằng câu thật ngắn rồi luyện dần đến thảo luận tự nhiên ở cấp C2.</p>
+            <div className="hero-actions"><button className="button primary" onClick={() => openView("programs")}>Chọn chủ đề đời sống</button><button className="button secondary" onClick={() => openView("topics")}>Tiếp tục bài đang học</button></div>
             <div className="trust-row"><span>Tiếng Việt có dấu đầy đủ</span><span>Luyện nói trước câu hỏi</span><span>Beginner đến thành thạo</span></div>
           </div>
           <div className="audio-lab compact-lab"><div className="audio-card"><div className="card-top"><div><span className="pill yellow">{selectedStage.label} · {selectedStage.vi} · {selectedStage.level}</span><h2>{selectedStage.promise}</h2></div><span className="big-emoji">{selectedStage.icon}</span></div><Wave active={playing}/><div className="player"><button onClick={() => filteredTopics[0] && playTopic(filteredTopics[0])}>{playing ? "Ⅱ" : "▶"}</button><div><b>Nghe mẫu hội thoại thật</b><small>Nghe tiếng Anh trước, mở dịch Việt sau, rồi nói lại.</small></div><span>listen · repeat · speak</span></div></div></div>
         </div>}
 
-        {activeView === "roadmap" && <div className="level-rail app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH HỌC ĐƠN GIẢN - HIỆU QUẢ</span><h2>Đi từ Beginner đến thông hiểu - thành thạo</h2></div><p>Dữ liệu hiện dùng 60 chủ đề đời sống, 7 cấp năng lực và 5 biến thể luyện tập cho mỗi chủ đề.</p></div><div className="roadmap-stats"><span><b>2.100</b><small>bài nghe - nói</small></span><span><b>60</b><small>chủ đề đời sống</small></span><span><b>7</b><small>cấp năng lực</small></span><span><b>5</b><small>biến thể mỗi chủ đề</small></span></div><div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Học mỗi ngày: {stage.daily}</div><footer><span>Đầu ra</span><span>{stage.output}</span></footer></div></article>)}</div><div className="roadmap-support"><article><h3>Chu trình 1 bài học</h3><ol>{studyCycle.map((item) => <li key={item}>{item}</li>)}</ol></article><article><h3>Khi nào lên cấp?</h3><ol>{levelUpChecks.map((item) => <li key={item}>{item}</li>)}</ol></article><article className="source-guide"><h3>Nguồn chuẩn dùng để thiết kế lại</h3><ol>{sourceGuides.map((item) => <li key={item}>{item}</li>)}</ol></article></div></div>}
+{activeView === "roadmap" && <div className="level-rail app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH HỌC ĐƠN GIẢN - HIỆU QUẢ</span><h2>Đi từ Beginner đến thông hiểu - thành thạo</h2></div><p>Bộ 2.000 bài thuộc 20 nhóm đời sống, tăng dần từ câu ngắn đến thảo luận có sắc thái.</p></div><div className="roadmap-stats"><span><b>{topics.length.toLocaleString("vi-VN")}</b><small>bài nghe - nói</small></span><span><b>{new Set(topics.map((topic) => topic.baseTopic)).size}</b><small>chủ đề đời sống</small></span><span><b>7</b><small>cấp năng lực</small></span><span><b>100%</b><small>hội thoại biên soạn mới</small></span></div><div className="lesson-grid">{roadmap.map((stage) => <article key={stage.id}><div className="lesson-visual"><span>{stage.level}</span></div><div className="lesson-body"><h3>{stage.title}</h3><p>{stage.goal}</p><div className="format">Học mỗi ngày: {stage.daily}</div><footer><span>Đầu ra</span><span>{stage.output}</span></footer></div></article>)}</div><div className="roadmap-support"><article><h3>Chu trình 1 bài học</h3><ol>{studyCycle.map((item) => <li key={item}>{item}</li>)}</ol></article><article><h3>Khi nào lên cấp?</h3><ol>{levelUpChecks.map((item) => <li key={item}>{item}</li>)}</ol></article><article className="source-guide"><h3>Nguồn chuẩn dùng để thiết kế lại</h3><ol>{sourceGuides.map((item) => <li key={item}>{item}</li>)}</ol></article></div></div>}
 
-        {activeView === "programs" && <div className="tracks-section app-panel"><div className="section-heading"><div><span className="kicker">LỘ TRÌNH THEO NĂNG LỰC</span><h2>Từ Beginner đến thông hiểu - thành thạo</h2></div><p>Chọn cấp độ hiện tại để lọc chủ đề, độ dài hội thoại và bài luyện nói phù hợp.</p></div><div className="track-grid">{fluencyStages.map((item) => <article key={item.id} className={stage === item.id ? "selected-card" : ""} onClick={() => setStage(item.id)}><span>{item.icon}</span><b>{item.label}</b><small>{`${item.vi} · ${item.level}`}</small><p>{item.promise}</p><ul>{item.goals.map((goal) => <li key={goal}>{goal}</li>)}</ul><button className="button secondary" onClick={(event) => { event.stopPropagation(); setStage(item.id); openView("topics"); }}>Xem chủ đề</button></article>)}</div></div>}
+        {activeView === "programs" && <div className="tracks-section app-panel"><div className="section-heading"><div><span className="kicker">CHỦ ĐỀ TRONG ĐỜI SỐNG HẰNG NGÀY</span><h2>Chọn việc bạn thật sự muốn nói</h2></div><p>Mỗi chủ đề có đủ 7 bậc từ A0–Pre A1 đến C2. Hãy bắt đầu ở mức dễ nhất rồi tiến dần trong cùng một bối cảnh.</p></div><div className="track-grid daily-theme-grid">{dailyLifeThemes.map((item) => { const lessonCount = topics.filter((topic) => themeForTopic(topic) === item.id).length; return <article key={item.id} className={theme === item.id ? "selected-card" : ""} onClick={() => setTheme(item.id)}><span>{item.icon}</span><b>{item.title}</b><small>{item.en} · {lessonCount} bài</small><p>{item.description}</p><div className="theme-levels">{fluencyStages.map((level) => <i key={level.id}>{level.icon}</i>)}</div><button className="button secondary" onClick={(event) => { event.stopPropagation(); setTheme(item.id); setStage("beginner"); openView("topics"); }}>Bắt đầu từ cơ bản</button></article>; })}</div></div>}
 
         {activeView === "method" && <div className="method app-panel"><span className="kicker">CÔNG THỨC PHẢN XẠ</span><h2>Nghe trước, luyện nói song ngữ, rồi mới trả lời câu hỏi</h2><p className="section-sub">Cấu trúc mỗi bài: bài nghe song ngữ, bài luyện nói song ngữ, ghi âm, sau đó mới đến câu hỏi kiểm tra.</p><div className="method-grid"><article><span>1</span><b>Nghe không nhìn chữ</b><p>Bắt bối cảnh, người nói, ý chính.</p></article><article><span>2</span><b>Mở song ngữ</b><p>Đọc câu tiếng Anh kèm dịch Việt.</p></article><article><span>3</span><b>Luyện nói song ngữ</b><p>Nói câu mẫu, hiểu nghĩa, rồi đổi thành câu của mình.</p></article><article><span>4</span><b>Câu hỏi sau cùng</b><p>Trả lời để kiểm tra nghe hiểu và khả năng dùng câu.</p></article></div></div>}
 
-        {activeView === "topics" && <div className="lesson-section app-panel"><div className="section-heading"><div><span className="kicker">CHỦ ĐỀ SONG NGỮ</span><h2>{selectedStage.label}: bài nghe - nói theo đời sống</h2><p className="catalog-summary">Mỗi chủ đề đều có bài luyện nói song ngữ trước phần câu hỏi.</p></div><div className="filters">{fluencyStages.map((item) => <button key={item.id} className={stage === item.id ? "active" : ""} onClick={() => setStage(item.id)}>{item.label}</button>)}</div></div><div className="catalog-tools"><label className="search-box">Tìm <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="chủ đề, bản dịch, cấp độ..." /></label><span><b>{filteredTopics.length}</b> chủ đề phù hợp</span></div><div className="lesson-grid">{filteredTopics.map((topic) => <article key={topic.id} onClick={() => setOpenTopic(topic)}><div className="lesson-visual"><span>{topic.level}</span><button aria-label={`Mở ${topic.vi}`}>▶</button><i>{selectedStage.label}</i></div><div className="lesson-body"><div className="lesson-tags"><span className="pill blue">{topic.en}</span></div><h3>{topic.vi}</h3><p>{topic.listenTask}</p><div className="format">Luyện nói: {topic.speakTask}</div><footer><span>{topic.variant}</span><span>12-18 phút</span></footer></div></article>)}</div></div>}
+        {activeView === "topics" && <div className="lesson-section app-panel"><div className="section-heading topic-first-heading"><div><span className="kicker">{selectedTheme.en.toUpperCase()}</span><h2>{selectedTheme.title}</h2><p className="catalog-summary">{selectedTheme.description} Chọn cấp độ bên dưới để đi từ câu đơn giản đến diễn đạt thành thạo.</p></div><button className="button secondary" onClick={() => openView("programs")}>Đổi chủ đề</button></div><div className="theme-progress" aria-label="Lộ trình cấp độ">{fluencyStages.map((item, index) => <button key={item.id} className={stage === item.id ? "active" : ""} onClick={() => setStage(item.id)}><span>{index + 1}</span><b>{item.icon}</b><small>{item.label}</small></button>)}</div><div className="catalog-tools"><label className="search-box">Tìm trong chủ đề <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="tình huống hoặc kỹ năng..." /></label><span><b>{filteredTopics.length}</b> bài · {selectedStage.level}</span></div><div className="lesson-grid">{filteredTopics.map((topic) => <article key={topic.id} onClick={() => setOpenTopic(topic)}><div className="lesson-visual"><span>{topic.level}</span><button aria-label={`Mở ${topic.vi}`}>▶</button><i>{selectedTheme.title}</i></div><div className="lesson-body"><div className="lesson-tags"><span className="pill blue">{topic.en}</span></div><h3>{topic.vi}</h3><p>{topic.listenTask}</p><div className="format">Luyện nói: {topic.speakTask}</div><footer><span>{topic.variant}</span><span>{topic.sourceBasis ? `Tham chiếu ${topic.sourceBasis}` : "Biên soạn gốc"}</span></footer></div></article>)}</div>{filteredTopics.length === 0 && <div className="empty-state">Chưa tìm thấy bài phù hợp. Hãy thử từ khóa khác hoặc chọn cấp độ kế tiếp.</div>}</div>}
       </section>
 
       {openTopic && <div className="lesson-modal" role="dialog" aria-modal="true"><div className="modal-backdrop" onClick={() => setOpenTopic(null)}/><div className="lesson-panel"><button className="close" onClick={() => setOpenTopic(null)}>×</button><header><span className="lesson-icon">{openTopic.level}</span><div><span className="pill blue">{openTopic.en}</span><h2>{openTopic.vi}</h2><p>Dạng bài: {openTopic.variant}. Thứ tự: nghe song ngữ → luyện nói song ngữ → ghi âm → câu hỏi.</p></div></header><section className="listen-block"><h3>1. Bài nghe song ngữ</h3><div className="audio-player"><button onClick={() => playTopic(openTopic)}>{playing ? "Ⅱ" : "▶"}</button><Wave active={playing}/><span>Nghe 2 giọng nam/nữ, không đọc tên người đối thoại</span></div><button className="transcript-toggle" onClick={() => setShowVietnamese(!showVietnamese)}>{showVietnamese ? "Ẩn dịch tiếng Việt" : "Hiện dịch tiếng Việt"}</button><div className="transcript bilingual-lines">{openTopic.lines.map((line, index) => <p key={`${line.speaker}-${index}-${line.en}`}><small>{line.speaker === "female" ? "Giọng nữ" : "Giọng nam"}</small><b>{line.en}</b>{showVietnamese && <span>{line.vi}</span>}</p>)}</div></section><section><h3>2. Bài luyện nói song ngữ</h3><div className="speaking-drill-list">{speakingDrills(openTopic).map((drill) => <article key={drill.en}><b>{drill.en}</b><span>{drill.vi}</span><small>{drill.action}</small></article>)}</div><p><b>Nhiệm vụ nói:</b> {openTopic.speakTask}</p></section><section className="speaking-practice"><h3>3. Ghi âm luyện nói</h3><p>Nói lại câu mẫu, sau đó đổi thông tin thành câu của bạn: người, nơi chốn, lý do, thời gian.</p><button className={`record-button ${recording ? "active" : ""}`} onClick={recordSpeech}><b>{recording ? "Dừng và lưu bản ghi" : "Bắt đầu nói"}</b><small>{recording ? "Đang ghi âm" : "Cho phép micro để luyện nói"}</small></button>{recordingUrl && <div className="recording-result"><audio controls src={recordingUrl}/></div>}</section><section><h3>4. Câu hỏi sau luyện nói</h3><div className="question-list">{topicQuestions(openTopic).map((item) => <article key={item.q}><b>{item.q}</b><span>{item.vi}</span><small>Gợi ý: {item.answer}</small></article>)}</div></section></div></div>}

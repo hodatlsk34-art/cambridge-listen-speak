@@ -1,11 +1,11 @@
 {
-  "updated": "2026-07-19",
-  "purpose": "Nguon hoi thoai chuan de dua vao pipeline luyen nghe noi, uu tien nguon co license mo va phu hop noi dung doi song.",
+  "updated": "2026-07-20",
+  "purpose": "Nguồn mở dùng để nghiên cứu miền giao tiếp, lượt lời và tính tự nhiên. Nội dung xuất bản trong app/dialogues.ts được biên soạn mới, không sao chép transcript.",
   "recommended": [
     {
       "id": "taskmaster",
       "name": "Google Taskmaster",
-      "url": "https://huggingface.co/datasets/GEM/Taskmaster",
+      "url": "https://research.google/pubs/taskmaster-1-toward-a-realistic-and-diverse-dialog-dataset/",
       "license": "CC BY 4.0",
       "use": "Task-oriented daily service dialogues: restaurants, movies, transport, appointments, ordering and planning.",
       "commercialOk": true
@@ -42,9 +42,21 @@
       "url": "https://huggingface.co/datasets/roskoN/dailydialog",
       "license": "CC BY-NC-SA 4.0",
       "commercialOk": false
+    },
+    {
+      "id": "dailytalk",
+      "name": "DailyTalk",
+      "url": "https://github.com/keonlee9420/DailyTalk",
+      "license": "CC BY-SA 4.0; repository describes academic use",
+      "commercialOk": false
     }
   ],
   "referenceOnly": [
+    {
+      "id": "common-voice",
+      "name": "Mozilla Common Voice",
+      "notes": "Hữu ích cho giọng nói/ASR nhưng không phải corpus hội thoại nhiều lượt; không dùng để tạo nội dung bài."
+    },
     {
       "id": "bbc-learning-english",
       "name": "BBC Learning English",

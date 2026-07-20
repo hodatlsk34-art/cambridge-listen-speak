@@ -1,4 +1,10 @@
-# vinext-starter
+# English Listening & Speaking
+
+Ứng dụng luyện nghe nói tiếng Anh với 2.000 bài hội thoại song ngữ, được sắp
+xếp theo 20 nhóm chủ đề đời sống và 7 bậc từ A0–Pre A1 đến C2. Bộ bài trong `app/dialogues.ts` và
+`app/dialogues-expanded.ts` được biên soạn mới;
+các corpus mở chỉ được dùng để nghiên cứu miền giao tiếp và cấu trúc tình huống,
+không sao chép transcript nguyên văn.
 
 A clean full-stack starter running on
 [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
